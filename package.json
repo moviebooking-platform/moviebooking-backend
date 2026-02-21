@@ -1,0 +1,29 @@
+{
+  "name": "movie-ticket-booking",
+  "version": "1.0.0",
+  "description": "Movie Ticket Booking System - Microservices Architecture",
+  "private": true,
+  "workspaces": [
+    "services/*",
+    "libs/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "start:dev": "npm run start:dev --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "lint:fix": "npm run lint:fix --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "test:cov": "npm run test:cov --workspaces --if-present",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "db:migrate": "npm run migration:run --workspace=@moviebooking/database",
+    "db:migrate:generate": "npm run migration:generate --workspace=@moviebooking/database"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
+  "author": "",
+  "license": "UNLICENSED"
+}
