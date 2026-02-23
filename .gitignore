@@ -6,16 +6,14 @@ node_modules/
 # Build outputs
 dist/
 build/
-!services/**/dist/
-
-#folders
-docs/
-
 
 # Environment files
 .env
 .env.local
 .env.*.local
+
+# Development docs (local only)
+docs/
 
 # IDE
 .idea/
@@ -23,6 +21,7 @@ docs/
 *.swp
 *.swo
 .DS_Store
+.kiro
 
 # Logs
 logs/
