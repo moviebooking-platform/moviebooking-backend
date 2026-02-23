@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './modules/auth/auth.module';
+import { UsersModule } from './modules/users/users.module';
 import { User, Role } from './entities';
 
 @Module({
@@ -35,6 +36,7 @@ import { User, Role } from './entities';
 
     // Feature modules
     AuthModule,
+    UsersModule,
   ],
 })
 export class AppModule {}
