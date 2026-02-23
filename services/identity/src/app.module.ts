@@ -2,8 +2,6 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './modules/auth/auth.module';
-import { UsersModule } from './modules/users/users.module';
-import { HealthModule } from './modules/health/health.module';
 import { User, Role } from './entities';
 
 @Module({
@@ -25,7 +23,7 @@ import { User, Role } from './entities';
         username: configService.get<string>('DB_USERNAME', 'sa'),
         password: configService.get<string>('DB_PASSWORD', ''),
         database: configService.get<string>('DB_DATABASE', 'moviebooking_db'),
-        entities: [User, Role], // TheatreAdmin will be added in M3
+        entities: [User, Role],
         synchronize: false,
         logging: configService.get('NODE_ENV') === 'development',
         options: {
@@ -37,8 +35,6 @@ import { User, Role } from './entities';
 
     // Feature modules
     AuthModule,
-    UsersModule,
-    HealthModule,
   ],
 })
 export class AppModule {}
