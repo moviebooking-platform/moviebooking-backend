@@ -19,6 +19,7 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { UpdateStatusDto } from './dto/update-status.dto';
 import { ListUsersQueryDto } from './dto/list-users-query.dto';
 import { UserResponseDto, PaginatedUsersResponseDto } from './dto/user-response.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -80,5 +81,33 @@ export class UsersController {
     @Body() updateUserDto: UpdateUserDto,
   ) {
     return this.usersService.update(id, updateUserDto);
+  }
+
+  @Patch(':id/password')
+  @Roles(ROLES.SUPER_ADMIN)
+  @ApiOperation({ summary: 'Reset user password', description: 'Generate new temporary password for user (Super Admin only)' })
+  @ApiParam({ name: 'id', type: Number, description: 'User ID' })
+  @ApiResponse({ status: 200, description: 'Password reset successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden - requires SUPER_ADMIN role' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  async resetPassword(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.resetPassword(id);
+  }
+
+  @Patch(':id/status')
+  @Roles(ROLES.SUPER_ADMIN)
+  @ApiOperation({ summary: 'Update user status', description: 'Enable or disable user (Super Admin only)' })
+  @ApiParam({ name: 'id', type: Number, description: 'User ID' })
+  @ApiResponse({ status: 200, description: 'Status updated', type: UserResponseDto })
+  @ApiResponse({ status: 400, description: 'Validation error' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden - requires SUPER_ADMIN role' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  async updateStatus(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateStatusDto: UpdateStatusDto,
+  ) {
+    return this.usersService.updateStatus(id, updateStatusDto.status);
   }
 }

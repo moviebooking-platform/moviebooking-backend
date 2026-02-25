@@ -11,11 +11,6 @@ export class CreateUserDto {
   @IsEmail()
   email: string;
 
-  @ApiProperty({ example: 'password123', description: 'User password', minLength: 8 })
-  @IsString()
-  @MinLength(8)
-  password: string;
-
   @ApiProperty({ example: 1, description: 'Role ID to assign to user' })
   @IsInt()
   roleId: number;

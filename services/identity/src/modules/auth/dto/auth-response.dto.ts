@@ -45,6 +45,13 @@ export class LoginResponseDto {
 
   @ApiProperty({ type: UserDto })
   user: UserDto;
+
+  @ApiProperty({ 
+    example: false, 
+    required: false,
+    description: 'True if user must change password before proceeding' 
+  })
+  mustChangePassword?: boolean;
 }
 
 export class RefreshResponseDto {

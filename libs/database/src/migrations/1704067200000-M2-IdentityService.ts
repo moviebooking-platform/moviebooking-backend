@@ -52,9 +52,16 @@ export class M2IdentityService1704067200000 implements MigrationInterface {
     `);
 
     // Seed default super admin user from environment variables
-    const adminName = process.env.ADMIN_NAME || 'Super Admin';
-    const adminEmail = process.env.ADMIN_EMAIL || 'admin@moviebooking.com';
-    const adminPassword = process.env.ADMIN_PASSWORD || 'Admin@123';
+    const adminName = process.env.ADMIN_NAME;
+    const adminEmail = process.env.ADMIN_EMAIL;
+    const adminPassword = process.env.ADMIN_PASSWORD;
+
+    if (!adminName || !adminEmail || !adminPassword) {
+      throw new Error(
+        'Missing required environment variables: ADMIN_NAME, ADMIN_EMAIL, ADMIN_PASSWORD',
+      );
+    }
+
     const passwordHash = await bcrypt.hash(adminPassword, 12);
 
     await queryRunner.query(`

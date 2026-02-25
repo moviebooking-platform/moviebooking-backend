@@ -7,7 +7,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOptionsWhere } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User, Role, UserStatus } from '../../entities';
-import { ERROR_CODES, PaginatedResponse } from '@moviebooking/common';
+import { ERROR_CODES, PaginatedResponse, generateTempPassword } from '@moviebooking/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ListUsersQueryDto } from './dto/list-users-query.dto';
@@ -78,7 +78,7 @@ export class UsersService {
   }
 
   async create(createUserDto: CreateUserDto) {
-    const { email, password, name, roleId } = createUserDto;
+    const { email, name, roleId } = createUserDto;
 
     // Check if email exists
     const existingUser = await this.userRepository.findOne({
@@ -101,16 +101,23 @@ export class UsersService {
       });
     }
 
-    // Hash password
-    const passwordHash = await bcrypt.hash(password, 12);
+    // Generate temporary password
+    const tempPassword = generateTempPassword();
+    const passwordHash = await bcrypt.hash(tempPassword, 12);
 
-    // Create user
+    // Set password expiry to 24 hours from now
+    const passwordExpiresAt = new Date();
+    passwordExpiresAt.setHours(passwordExpiresAt.getHours() + 24);
+
+    // Create user with temp password
     const user = this.userRepository.create({
       name,
       email,
       passwordHash,
       roleId,
       status: UserStatus.ACTIVE,
+      mustChangePassword: true,
+      passwordExpiresAt,
     });
 
     const savedUser = await this.userRepository.save(user);
@@ -121,7 +128,10 @@ export class UsersService {
       relations: ['role'],
     });
 
-    return this.mapUserResponse(userWithRole!);
+    return {
+      ...this.mapUserResponse(userWithRole!),
+      tempPassword, // Return temp password for admin to share with user
+    };
   }
 
   async findOne(id: number) {
@@ -200,5 +210,57 @@ export class UsersService {
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     };
+  }
+
+  async resetPassword(id: number) {
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations: ['role'],
+    });
+
+    if (!user) {
+      throw new NotFoundException({
+        code: ERROR_CODES.NOT_FOUND,
+        message: 'User not found',
+      });
+    }
+
+    // Generate new temporary password
+    const tempPassword = generateTempPassword();
+    const passwordHash = await bcrypt.hash(tempPassword, 12);
+
+    // Set password expiry to 24 hours from now
+    const passwordExpiresAt = new Date();
+    passwordExpiresAt.setHours(passwordExpiresAt.getHours() + 24);
+
+    user.passwordHash = passwordHash;
+    user.mustChangePassword = true;
+    user.passwordExpiresAt = passwordExpiresAt;
+
+    await this.userRepository.save(user);
+
+    return {
+      message: 'Password reset successfully',
+      tempPassword, // Return temp password for admin to share with user
+    };
+  }
+
+  async updateStatus(id: number, status: UserStatus) {
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations: ['role'],
+    });
+
+    if (!user) {
+      throw new NotFoundException({
+        code: ERROR_CODES.NOT_FOUND,
+        message: 'User not found',
+      });
+    }
+
+    user.status = status;
+    await this.userRepository.save(user);
+
+    return this.mapUserResponse(user);
   }
 }

@@ -28,5 +28,11 @@ export class User extends BaseEntity {
   })
   status: UserStatus;
 
+  @Column({ name: 'must_change_password', type: 'bit', default: false })
+  mustChangePassword: boolean;
+
+  @Column({ name: 'password_expires_at', type: 'datetime2', nullable: true })
+  passwordExpiresAt: Date | null;
+
   // TheatreAdmin relationship will be added in M3
 }

@@ -2,6 +2,7 @@ import {
   Injectable,
   UnauthorizedException,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -11,6 +12,7 @@ import * as bcrypt from 'bcrypt';
 import { User, UserStatus } from '../../entities';
 import { ERROR_CODES, ICurrentUser } from '@moviebooking/common';
 import { LoginDto } from './dto/login.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -54,6 +56,14 @@ export class AuthService {
       });
     }
 
+    // Check if temporary password has expired
+    if (user.passwordExpiresAt && new Date() > user.passwordExpiresAt) {
+      throw new UnauthorizedException({
+        code: ERROR_CODES.PASSWORD_EXPIRED,
+        message: 'Temporary password has expired. Please contact administrator.',
+      });
+    }
+
     // Generate tokens
     const tokens = await this.generateTokens(user);
 
@@ -70,6 +80,11 @@ export class AuthService {
         },
       },
     };
+
+    // Add mustChangePassword flag if user needs to change password
+    if (user.mustChangePassword) {
+      response.mustChangePassword = true;
+    }
 
     // Add assignedTheatreId only for Theatre Admin role
     if (user.role.code === 'THEATRE_ADMIN') {
@@ -113,6 +128,48 @@ export class AuthService {
 
   async logout(_userId: number) {
     return;
+  }
+
+  async changePassword(userId: number, changePasswordDto: ChangePasswordDto) {
+    const { currentPassword, newPassword } = changePasswordDto;
+
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException({
+        code: ERROR_CODES.NOT_FOUND,
+        message: 'User not found',
+      });
+    }
+
+    // Verify current password
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.passwordHash);
+    if (!isPasswordValid) {
+      throw new BadRequestException({
+        code: ERROR_CODES.INVALID_CREDENTIALS,
+        message: 'Current password is incorrect',
+      });
+    }
+
+    // Ensure new password is different from current
+    const isSamePassword = await bcrypt.compare(newPassword, user.passwordHash);
+    if (isSamePassword) {
+      throw new BadRequestException({
+        code: ERROR_CODES.VALIDATION_ERROR,
+        message: 'New password must be different from current password',
+      });
+    }
+
+    // Hash and save new password
+    user.passwordHash = await bcrypt.hash(newPassword, 12);
+    user.mustChangePassword = false;
+    user.passwordExpiresAt = null;
+
+    await this.userRepository.save(user);
+
+    return { message: 'Password changed successfully' };
   }
 
   async getProfile(userId: number) {
