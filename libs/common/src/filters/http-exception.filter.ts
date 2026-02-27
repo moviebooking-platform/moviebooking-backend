@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { ApiResponse } from '../dto/api-response.dto';
-import { ERROR_CODES } from '../constants/error-codes.constant';
+import { ERRORS, ErrorKey, AppException } from '../constants/error-codes.constant';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -20,11 +20,19 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest();
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
-    let code: string = ERROR_CODES.INTERNAL_ERROR;
-    let message = 'Internal server error';
+    let code: string = ERRORS.INTERNAL_ERROR.code;
+    let message: string = ERRORS.INTERNAL_ERROR.message;
     let details: any[] | undefined;
 
-    if (exception instanceof HttpException) {
+    // Handle AppException
+    if (exception instanceof AppException) {
+      status = exception.getStatus();
+      const res = exception.getResponse() as { code: string; message: string };
+      code = res.code;
+      message = res.message;
+    }
+    // Handle standard HttpException
+    else if (exception instanceof HttpException) {
       status = exception.getStatus();
       const exceptionResponse = exception.getResponse();
 
@@ -37,7 +45,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
         message = exceptionResponse as string;
         code = this.getErrorCodeFromStatus(status);
       }
-    } else if (exception instanceof Error) {
+    }
+    // Handle unknown errors
+    else if (exception instanceof Error) {
       message = exception.message;
       this.logger.error(
         `Unhandled exception: ${exception.message}`,
@@ -55,21 +65,16 @@ export class HttpExceptionFilter implements ExceptionFilter {
   }
 
   private getErrorCodeFromStatus(status: number): string {
-    switch (status) {
-      case 400:
-        return ERROR_CODES.VALIDATION_ERROR;
-      case 401:
-        return ERROR_CODES.UNAUTHORIZED;
-      case 403:
-        return ERROR_CODES.FORBIDDEN;
-      case 404:
-        return ERROR_CODES.NOT_FOUND;
-      case 409:
-        return ERROR_CODES.DUPLICATE_RESOURCE;
-      case 429:
-        return ERROR_CODES.RATE_LIMIT_EXCEEDED;
-      default:
-        return ERROR_CODES.INTERNAL_ERROR;
-    }
+    const statusToError: Record<number, ErrorKey> = {
+      400: 'VALIDATION_ERROR',
+      401: 'UNAUTHORIZED',
+      403: 'FORBIDDEN',
+      404: 'NOT_FOUND',
+      409: 'DUPLICATE_RESOURCE',
+      429: 'RATE_LIMIT_EXCEEDED',
+    };
+
+    const errorKey = statusToError[status] || 'INTERNAL_ERROR';
+    return ERRORS[errorKey].code;
   }
 }
