@@ -1,16 +1,11 @@
-import {
-  Injectable,
-  UnauthorizedException,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { User, UserStatus } from '../../entities';
-import { ERROR_CODES, ICurrentUser } from '@moviebooking/common';
+import { throwError, ICurrentUser, ROLES } from '@moviebooking/common';
 import { LoginDto } from './dto/login.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 
@@ -33,35 +28,23 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new UnauthorizedException({
-        code: ERROR_CODES.INVALID_CREDENTIALS,
-        message: 'Invalid email or password',
-      });
+      throwError('INVALID_CREDENTIALS');
     }
 
     // Check if user is active
     if (user.status !== UserStatus.ACTIVE) {
-      throw new UnauthorizedException({
-        code: ERROR_CODES.INVALID_CREDENTIALS,
-        message: 'Account is disabled',
-      });
+      throwError('INVALID_CREDENTIALS', 'Account is disabled');
     }
 
     // Verify password
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
     if (!isPasswordValid) {
-      throw new UnauthorizedException({
-        code: ERROR_CODES.INVALID_CREDENTIALS,
-        message: 'Invalid email or password',
-      });
+      throwError('INVALID_CREDENTIALS');
     }
 
     // Check if temporary password has expired
     if (user.passwordExpiresAt && new Date() > user.passwordExpiresAt) {
-      throw new UnauthorizedException({
-        code: ERROR_CODES.PASSWORD_EXPIRED,
-        message: 'Temporary password has expired. Please contact administrator.',
-      });
+      throwError('PASSWORD_EXPIRED');
     }
 
     // Generate tokens
@@ -87,43 +70,11 @@ export class AuthService {
     }
 
     // Add assignedTheatreId only for Theatre Admin role
-    if (user.role.code === 'THEATRE_ADMIN') {
+    if (user.role.code === ROLES.THEATRE_ADMIN) {
       response.user.assignedTheatreId = null;
     }
 
     return response;
-  }
-
-  async refreshToken(refreshToken: string) {
-    try {
-      const payload = this.jwtService.verify(refreshToken, {
-        secret: this.configService.get('JWT_REFRESH_SECRET'),
-      });
-
-      const user = await this.userRepository.findOne({
-        where: { id: payload.sub },
-        relations: ['role'],
-      });
-
-      if (!user || user.status !== UserStatus.ACTIVE) {
-        throw new UnauthorizedException({
-          code: ERROR_CODES.TOKEN_INVALID,
-          message: 'Invalid refresh token',
-        });
-      }
-
-      const accessToken = this.generateAccessToken(user);
-
-      return {
-        accessToken,
-        expiresIn: 3600,
-      };
-    } catch {
-      throw new UnauthorizedException({
-        code: ERROR_CODES.TOKEN_INVALID,
-        message: 'Invalid refresh token',
-      });
-    }
   }
 
   async logout(_userId: number) {
@@ -138,28 +89,19 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new NotFoundException({
-        code: ERROR_CODES.NOT_FOUND,
-        message: 'User not found',
-      });
+      throwError('NOT_FOUND', 'User not found');
     }
 
     // Verify current password
     const isPasswordValid = await bcrypt.compare(currentPassword, user.passwordHash);
     if (!isPasswordValid) {
-      throw new BadRequestException({
-        code: ERROR_CODES.INVALID_CREDENTIALS,
-        message: 'Current password is incorrect',
-      });
+      throwError('INVALID_CREDENTIALS', 'Current password is incorrect');
     }
 
     // Ensure new password is different from current
     const isSamePassword = await bcrypt.compare(newPassword, user.passwordHash);
     if (isSamePassword) {
-      throw new BadRequestException({
-        code: ERROR_CODES.VALIDATION_ERROR,
-        message: 'New password must be different from current password',
-      });
+      throwError('VALIDATION_ERROR', 'New password must be different from current password');
     }
 
     // Hash and save new password
@@ -179,10 +121,7 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new NotFoundException({
-        code: ERROR_CODES.NOT_FOUND,
-        message: 'User not found',
-      });
+      throwError('NOT_FOUND', 'User not found');
     }
 
     const profile: any = {
@@ -197,7 +136,7 @@ export class AuthService {
       status: user.status,
     };
 
-    if (user.role.code === 'THEATRE_ADMIN') {
+    if (user.role.code === ROLES.THEATRE_ADMIN) {
       profile.assignedTheatreId = null; 
     }
 
@@ -220,6 +159,32 @@ export class AuthService {
       refreshToken,
       expiresIn: 3600,
     };
+  }
+
+   async refreshToken(refreshToken: string) {
+    try {
+      const payload = this.jwtService.verify(refreshToken, {
+        secret: this.configService.get('JWT_REFRESH_SECRET'),
+      });
+
+      const user = await this.userRepository.findOne({
+        where: { id: payload.sub },
+        relations: ['role'],
+      });
+
+      if (!user || user.status !== UserStatus.ACTIVE) {
+        throwError('TOKEN_INVALID');
+      }
+
+      const accessToken = this.generateAccessToken(user);
+
+      return {
+        accessToken,
+        expiresIn: 3600,
+      };
+    } catch {
+      throwError('TOKEN_INVALID');
+    }
   }
 
   private generateAccessToken(user: User): string {

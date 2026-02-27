@@ -1,10 +1,6 @@
-import {
-  Injectable,
-  ExecutionContext,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, ExecutionContext } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ERROR_CODES } from '@moviebooking/common';
+import { AppException } from '@moviebooking/common';
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -15,15 +11,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
   handleRequest(err: any, user: any, info: any) {
     if (err || !user) {
       if (info?.name === 'TokenExpiredError') {
-        throw new UnauthorizedException({
-          code: ERROR_CODES.TOKEN_EXPIRED,
-          message: 'Token has expired',
-        });
+        throw new AppException('TOKEN_EXPIRED');
       }
-      throw new UnauthorizedException({
-        code: ERROR_CODES.UNAUTHORIZED,
-        message: 'Unauthorized',
-      });
+      throw new AppException('UNAUTHORIZED');
     }
     return user;
   }

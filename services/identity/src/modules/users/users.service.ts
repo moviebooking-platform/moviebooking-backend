@@ -1,13 +1,9 @@
-import {
-  Injectable,
-  ConflictException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOptionsWhere } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User, Role, UserStatus } from '../../entities';
-import { ERROR_CODES, PaginatedResponse, generateTempPassword } from '@moviebooking/common';
+import { throwError, PaginatedResponse, generateTempPassword } from '@moviebooking/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ListUsersQueryDto } from './dto/list-users-query.dto';
@@ -86,19 +82,13 @@ export class UsersService {
     });
 
     if (existingUser) {
-      throw new ConflictException({
-        code: ERROR_CODES.DUPLICATE_RESOURCE,
-        message: 'Email already exists',
-      });
+      throwError('DUPLICATE_RESOURCE', 'Email already exists');
     }
 
     // Verify role exists
     const role = await this.roleRepository.findOne({ where: { id: roleId } });
     if (!role) {
-      throw new NotFoundException({
-        code: ERROR_CODES.NOT_FOUND,
-        message: 'Role not found',
-      });
+      throwError('NOT_FOUND', 'Role not found');
     }
 
     // Generate temporary password
@@ -141,10 +131,7 @@ export class UsersService {
     });
 
     if (!user) {
-      throw new NotFoundException({
-        code: ERROR_CODES.NOT_FOUND,
-        message: 'User not found',
-      });
+      throwError('NOT_FOUND', 'User not found');
     }
 
     return this.mapUserResponse(user);
@@ -157,10 +144,7 @@ export class UsersService {
     });
 
     if (!user) {
-      throw new NotFoundException({
-        code: ERROR_CODES.NOT_FOUND,
-        message: 'User not found',
-      });
+      throwError('NOT_FOUND', 'User not found');
     }
 
     // Update fields
@@ -177,10 +161,7 @@ export class UsersService {
         where: { id: updateUserDto.roleId },
       });
       if (!role) {
-        throw new NotFoundException({
-          code: ERROR_CODES.NOT_FOUND,
-          message: 'Role not found',
-        });
+        throwError('NOT_FOUND', 'Role not found');
       }
       user.roleId = updateUserDto.roleId;
     }
@@ -219,10 +200,7 @@ export class UsersService {
     });
 
     if (!user) {
-      throw new NotFoundException({
-        code: ERROR_CODES.NOT_FOUND,
-        message: 'User not found',
-      });
+      throwError('NOT_FOUND', 'User not found');
     }
 
     // Generate new temporary password
@@ -252,10 +230,7 @@ export class UsersService {
     });
 
     if (!user) {
-      throw new NotFoundException({
-        code: ERROR_CODES.NOT_FOUND,
-        message: 'User not found',
-      });
+      throwError('NOT_FOUND', 'User not found');
     }
 
     user.status = status;
