@@ -4,6 +4,7 @@ export * from './dto/pagination.dto';
 
 // Decorators
 export * from './decorators/current-user.decorator';
+export * from './decorators/decrypt-id.decorator';
 
 // Filters
 export * from './filters/http-exception.filter';
@@ -24,3 +25,7 @@ export * from './constants/error-codes.constant';
 
 // Utils
 export * from './utils/nanoid.util';
+export * from './utils/id-cipher.util';
+
+// Modules
+export * from './modules/dev/dev.module';
