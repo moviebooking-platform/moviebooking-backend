@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOptionsWhere } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User, Role, UserStatus } from '../../entities';
-import { throwError, PaginatedResponse, generateTempPassword } from '@moviebooking/common';
+import { throwError, PaginatedResponse, generateTempPassword, encryptId } from '@moviebooking/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ListUsersQueryDto } from './dto/list-users-query.dto';
@@ -179,11 +179,11 @@ export class UsersService {
 
   private mapUserResponse(user: User) {
     return {
-      id: user.id,
+      id: encryptId(user.id),
       name: user.name,
       email: user.email,
       role: {
-        id: user.role.id,
+        id: encryptId(user.role.id),
         code: user.role.code,
         name: user.role.name,
       },

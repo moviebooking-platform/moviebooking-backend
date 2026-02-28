@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Role } from '../../entities';
+import { encryptId } from '@moviebooking/common';
 
 @Injectable()
 export class RolesService {
@@ -16,7 +17,7 @@ export class RolesService {
     });
 
     return roles.map((role) => ({
-      id: role.id,
+      id: encryptId(role.id),
       code: role.code,
       name: role.name,
     }));

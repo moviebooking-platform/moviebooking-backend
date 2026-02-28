@@ -1,5 +1,7 @@
-import { IsEmail, IsString, MinLength, IsInt } from 'class-validator';
+import { IsEmail, IsString, MinLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
+import { decryptId } from '@moviebooking/common';
 
 export class CreateUserDto {
   @ApiProperty({ example: 'John Doe', description: 'User full name', minLength: 2 })
@@ -11,7 +13,7 @@ export class CreateUserDto {
   @IsEmail()
   email: string;
 
-  @ApiProperty({ example: 1, description: 'Role ID to assign to user' })
-  @IsInt()
+  @ApiProperty({ example: 'abc123xyz', description: 'Encrypted Role ID to assign to user' })
+  @Transform(({ value }) => decryptId(String(value)))
   roleId: number;
 }

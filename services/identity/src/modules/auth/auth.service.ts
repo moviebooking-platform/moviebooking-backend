@@ -5,7 +5,7 @@ import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { User, UserStatus } from '../../entities';
-import { throwError, ICurrentUser, ROLES } from '@moviebooking/common';
+import { throwError, ICurrentUser, ROLES, encryptId } from '@moviebooking/common';
 import { LoginDto } from './dto/login.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 
@@ -53,11 +53,11 @@ export class AuthService {
     const response: any = {
       ...tokens,
       user: {
-        id: user.id,
+        id: encryptId(user.id),
         name: user.name,
         email: user.email,
         role: {
-          id: user.role.id,
+          id: encryptId(user.role.id),
           code: user.role.code,
           name: user.role.name,
         },
@@ -125,11 +125,11 @@ export class AuthService {
     }
 
     const profile: any = {
-      id: user.id,
+      id: encryptId(user.id),
       name: user.name,
       email: user.email,
       role: {
-        id: user.role.id,
+        id: encryptId(user.role.id),
         code: user.role.code,
         name: user.role.name,
       },

@@ -7,7 +7,6 @@ import {
   Body,
   Query,
   UseGuards,
-  ParseIntPipe,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -23,7 +22,7 @@ import { UpdateStatusDto } from './dto/update-status.dto';
 import { ListUsersQueryDto } from './dto/list-users-query.dto';
 import { UserResponseDto, PaginatedUsersResponseDto } from './dto/user-response.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard, ROLES } from '@moviebooking/common';
+import { RolesGuard, ROLES, DecryptId } from '@moviebooking/common';
 import { Roles } from './decorators/roles.decorator';
 
 @ApiTags('users')
@@ -58,26 +57,26 @@ export class UsersController {
   @Get(':id')
   @Roles(ROLES.SUPER_ADMIN)
   @ApiOperation({ summary: 'Get user by ID', description: 'Get user details (Super Admin only)' })
-  @ApiParam({ name: 'id', type: Number, description: 'User ID' })
+  @ApiParam({ name: 'id', type: String, description: 'Encrypted User ID' })
   @ApiResponse({ status: 200, description: 'User retrieved', type: UserResponseDto })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden - requires SUPER_ADMIN role' })
   @ApiResponse({ status: 404, description: 'User not found' })
-  async findOne(@Param('id', ParseIntPipe) id: number) {
+  async findOne(@DecryptId('id') id: number) {
     return this.usersService.findOne(id);
   }
 
   @Patch(':id')
   @Roles(ROLES.SUPER_ADMIN)
   @ApiOperation({ summary: 'Update user', description: 'Update user details (Super Admin only)' })
-  @ApiParam({ name: 'id', type: Number, description: 'User ID' })
+  @ApiParam({ name: 'id', type: String, description: 'Encrypted User ID' })
   @ApiResponse({ status: 200, description: 'User updated', type: UserResponseDto })
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden - requires SUPER_ADMIN role' })
   @ApiResponse({ status: 404, description: 'User not found' })
   async update(
-    @Param('id', ParseIntPipe) id: number,
+    @DecryptId('id') id: number,
     @Body() updateUserDto: UpdateUserDto,
   ) {
     return this.usersService.update(id, updateUserDto);
@@ -86,26 +85,26 @@ export class UsersController {
   @Patch(':id/password')
   @Roles(ROLES.SUPER_ADMIN)
   @ApiOperation({ summary: 'Reset user password', description: 'Generate new temporary password for user (Super Admin only)' })
-  @ApiParam({ name: 'id', type: Number, description: 'User ID' })
+  @ApiParam({ name: 'id', type: String, description: 'Encrypted User ID' })
   @ApiResponse({ status: 200, description: 'Password reset successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden - requires SUPER_ADMIN role' })
   @ApiResponse({ status: 404, description: 'User not found' })
-  async resetPassword(@Param('id', ParseIntPipe) id: number) {
+  async resetPassword(@DecryptId('id') id: number) {
     return this.usersService.resetPassword(id);
   }
 
   @Patch(':id/status')
   @Roles(ROLES.SUPER_ADMIN)
   @ApiOperation({ summary: 'Update user status', description: 'Enable or disable user (Super Admin only)' })
-  @ApiParam({ name: 'id', type: Number, description: 'User ID' })
+  @ApiParam({ name: 'id', type: String, description: 'Encrypted User ID' })
   @ApiResponse({ status: 200, description: 'Status updated', type: UserResponseDto })
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden - requires SUPER_ADMIN role' })
   @ApiResponse({ status: 404, description: 'User not found' })
   async updateStatus(
-    @Param('id', ParseIntPipe) id: number,
+    @DecryptId('id') id: number,
     @Body() updateStatusDto: UpdateStatusDto,
   ) {
     return this.usersService.updateStatus(id, updateStatusDto.status);

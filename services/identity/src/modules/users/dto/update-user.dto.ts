@@ -1,6 +1,8 @@
-import { IsString, IsOptional, IsInt, IsEnum, MinLength } from 'class-validator';
+import { IsString, IsOptional, IsEnum, MinLength } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import { UserStatus } from '../../../entities';
+import { decryptId } from '@moviebooking/common';
 
 export class UpdateUserDto {
   @ApiPropertyOptional({ example: 'John Doe', description: 'User full name', minLength: 2 })
@@ -14,8 +16,8 @@ export class UpdateUserDto {
   @IsEnum(UserStatus)
   status?: UserStatus;
 
-  @ApiPropertyOptional({ example: 1, description: 'Role ID to assign to user' })
+  @ApiPropertyOptional({ example: 'abc123xyz', description: 'Encrypted Role ID to assign to user' })
   @IsOptional()
-  @IsInt()
+  @Transform(({ value }) => value !== undefined ? decryptId(String(value)) : undefined)
   roleId?: number;
 }

@@ -3,7 +3,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
+import { DevModule } from '@moviebooking/common';
 import { User, Role } from './entities';
+
+// Conditionally include DevModule only in development
+const devModules = process.env.NODE_ENV !== 'production' ? [DevModule] : [];
 
 @Module({
   imports: [
@@ -37,6 +41,9 @@ import { User, Role } from './entities';
     // Feature modules
     AuthModule,
     UsersModule,
+
+    // Dev modules (only in non-production)
+    ...devModules,
   ],
 })
 export class AppModule {}
