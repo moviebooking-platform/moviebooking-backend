@@ -28,10 +28,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JwtPayload): Promise<ICurrentUser> {
-    if (!payload.sub) {
+    const userId = payload.id ?? payload.sub;
+
+    if (!userId) {
       throw new AppException('TOKEN_INVALID');
     }
-
+   
     return {
       id: payload.id,
       email: payload.email,
