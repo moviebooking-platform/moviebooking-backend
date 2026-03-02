@@ -1,19 +1,31 @@
-import { IsEmail, IsString, MinLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
+import { IsEmail, IsInt, IsString, Min, MinLength } from 'class-validator';
 import { decryptId } from '@moviebooking/common';
+import { BadRequestException } from '@nestjs/common';
 
 export class CreateUserDto {
-  @ApiProperty({ example: 'John Doe', description: 'User full name', minLength: 2 })
+  @ApiProperty({ example: 'John Doe', minLength: 2 })
   @IsString()
   @MinLength(2)
   name: string;
 
-  @ApiProperty({ example: 'john@example.com', description: 'User email address' })
+  @ApiProperty({ example: 'john@example.com' })
   @IsEmail()
   email: string;
 
-  @ApiProperty({ example: 'abc123xyz', description: 'Encrypted Role ID to assign to user' })
-  @Transform(({ value }) => decryptId(String(value)))
-  roleId: number;
+@ApiProperty({ example: '<encrypted>', description: 'Encrypted Role ID' })
+@Transform(({ value }) => {
+  const id = decryptId(String(value));
+  if (id === null) {
+    throw new BadRequestException({
+      code: 'VALIDATION_ERROR',
+      message: 'Invalid roleId',
+    });
+  }
+  return id; 
+}, { toClassOnly: true })
+@IsInt()
+@Min(1)
+roleId: number;
 }

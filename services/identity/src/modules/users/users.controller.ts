@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Patch,
-  Param,
   Body,
   Query,
   UseGuards,

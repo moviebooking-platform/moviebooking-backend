@@ -3,10 +3,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOptionsWhere } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User, Role, UserStatus } from '../../entities';
-import { throwError, PaginatedResponse, generateTempPassword, encryptId } from '@moviebooking/common';
-import { CreateUserDto } from './dto/create-user.dto';
+import { throwError, PaginatedResponse, generateTempPassword, encryptId, decryptId } from '@moviebooking/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ListUsersQueryDto } from './dto/list-users-query.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Injectable()
 export class UsersService {
@@ -73,8 +73,8 @@ export class UsersService {
     );
   }
 
-  async create(createUserDto: CreateUserDto) {
-    const { email, name, roleId } = createUserDto;
+  async create(UserDto: CreateUserDto) {
+    const { email, name, roleId } = UserDto;
 
     // Check if email exists
     const existingUser = await this.userRepository.findOne({
@@ -157,6 +157,10 @@ export class UsersService {
     }
 
     if (updateUserDto.roleId !== undefined) {
+      if (updateUserDto.roleId === null) {
+        throwError('VALIDATION_ERROR', 'Invalid roleId format');
+      }
+
       const role = await this.roleRepository.findOne({
         where: { id: updateUserDto.roleId },
       });
