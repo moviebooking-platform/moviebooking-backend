@@ -1,6 +1,8 @@
 import { Entity, Column, OneToMany } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { TheatreStatus } from '../enums';
+import { Screen } from './screen.entity';
+import { TheatreAdmin } from './theatre-admin.entity';
 
 @Entity('theatres')
 export class Theatre extends BaseEntity {
@@ -20,10 +22,9 @@ export class Theatre extends BaseEntity {
   })
   status: TheatreStatus;
 
-  // Relations will be added when Screen and TheatreAdmin entities are imported
-  // @OneToMany(() => Screen, (screen) => screen.theatre)
-  // screens: Screen[];
+  @OneToMany(() => Screen, (screen) => screen.theatre)
+  screens: Screen[];
 
-  // @OneToMany(() => TheatreAdmin, (admin) => admin.theatre)
-  // theatreAdmins: TheatreAdmin[];
+  @OneToMany(() => TheatreAdmin, (admin) => admin.theatre)
+  theatreAdmins: TheatreAdmin[];
 }

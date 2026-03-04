@@ -8,7 +8,7 @@ export class Seat extends BaseEntity {
   @Column({ name: 'screen_id' })
   screenId: number;
 
-  @ManyToOne(() => Screen)
+  @ManyToOne(() => Screen, (screen) => screen.seats)
   @JoinColumn({ name: 'screen_id' })
   screen: Screen;
 
