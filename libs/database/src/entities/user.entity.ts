@@ -34,5 +34,4 @@ export class User extends BaseEntity {
   @Column({ name: 'password_expires_at', type: 'datetime2', nullable: true })
   passwordExpiresAt: Date | null;
 
-  // TheatreAdmin relationship will be added in M3
 }
