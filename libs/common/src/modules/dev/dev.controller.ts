@@ -5,7 +5,7 @@ import { encryptId, decryptId, isIdCipherEnabled } from '../../utils/id-cipher.u
 /**
  * Development-only endpoints for testing ID encryption.
  * Protected by DevModule conditional import (non-production only)
- * and an additional runtime environment check as defense in depth.
+ * an additional runtime environment: assertNonProduction Method check as defense in depth.
  */
 @ApiTags('dev')
 @Controller('dev')
