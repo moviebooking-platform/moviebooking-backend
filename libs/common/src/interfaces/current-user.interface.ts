@@ -7,5 +7,5 @@ export interface ICurrentUser {
     code: string;
     name: string;
   };
-  // theatreId:number
+  theatreId?: number;
 }

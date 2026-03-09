@@ -7,7 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { ApiResponse } from '../dto/api-response.dto';
+import { errorResponse } from '../dto/api-response.dto';
 import { ERRORS, ErrorKey, AppException } from '../constants/error-codes.constant';
 
 @Catch()
@@ -37,10 +37,18 @@ export class HttpExceptionFilter implements ExceptionFilter {
       const exceptionResponse = exception.getResponse();
 
       if (typeof exceptionResponse === 'object') {
-        const res = exceptionResponse as any;
-        code = res.code || this.getErrorCodeFromStatus(status);
-        message = res.message || exception.message;
-        details = res.details || res.errors;
+        const res = exceptionResponse as Record<string, unknown>;
+        code = (res.code as string) || this.getErrorCodeFromStatus(status);
+
+        // Handle ValidationPipe Exception  
+        // ValidationPipe returns { message: string[], statusCode, error }
+        if (Array.isArray(res.message)) {
+          message = 'Validation failed';
+          details = res.message.map((msg: string) => ({ message: msg }));
+        } else {
+          message = (res.message as string) || exception.message;
+          details = (res.details || res.errors) as any[] | undefined;
+        }
       } else {
         message = exceptionResponse as string;
         code = this.getErrorCodeFromStatus(status);
@@ -55,13 +63,13 @@ export class HttpExceptionFilter implements ExceptionFilter {
       );
     }
 
-    const errorResponse = ApiResponse.error(code, message, details);
-    errorResponse.meta = {
+    const body = errorResponse(code, message, details);
+    body.meta = {
       timestamp: new Date().toISOString(),
       requestId: request.headers['x-request-id'],
     };
 
-    response.status(status).json(errorResponse);
+    response.status(status).json(body);
   }
 
   private getErrorCodeFromStatus(status: number): string {
