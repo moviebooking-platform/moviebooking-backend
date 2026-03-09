@@ -4,7 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
-import { User, UserStatus } from '../../entities';
+import { User, UserStatus, TheatreAdmin, TheatreAdminStatus } from '../../entities';
 import { throwError, ICurrentUser, ROLES, encryptId } from '@moviebooking/common';
 import { LoginDto } from './dto/login.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
@@ -14,6 +14,8 @@ export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(TheatreAdmin)
+    private readonly theatreAdminRepository: Repository<TheatreAdmin>,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {}
@@ -69,9 +71,15 @@ export class AuthService {
       response.mustChangePassword = true;
     }
 
-    // Add assignedTheatreId only for Theatre Admin role
+    // Add assignedTheatreId for Theatre Admin role
     if (user.role.code === ROLES.THEATRE_ADMIN) {
-      response.user.assignedTheatreId = null;
+      const assignment = await this.theatreAdminRepository.findOne({
+        where: { userId: user.id, status: TheatreAdminStatus.ACTIVE },
+      });
+
+      response.user.assignedTheatreId = assignment
+        ? encryptId(assignment.theatreId)
+        : null;
     }
 
     return response;
@@ -136,15 +144,22 @@ export class AuthService {
       status: user.status,
     };
 
+    // Add assignedTheatreId for Theatre Admin role
     if (user.role.code === ROLES.THEATRE_ADMIN) {
-      profile.assignedTheatreId = null; 
+      const assignment = await this.theatreAdminRepository.findOne({
+        where: { userId: user.id, status: TheatreAdminStatus.ACTIVE },
+      });
+
+      profile.assignedTheatreId = assignment
+        ? encryptId(assignment.theatreId)
+        : null;
     }
 
     return profile;
   }
 
   private async generateTokens(user: User) {
-    const accessToken = this.generateAccessToken(user);
+    const accessToken = await this.generateAccessToken(user);
 
     const refreshToken = this.jwtService.sign(
       { sub: user.id },
@@ -176,7 +191,7 @@ export class AuthService {
         throwError('TOKEN_INVALID');
       }
 
-      const accessToken = this.generateAccessToken(user);
+      const accessToken = await this.generateAccessToken(user);
 
       return {
         accessToken,
@@ -187,7 +202,7 @@ export class AuthService {
     }
   }
 
-  private generateAccessToken(user: User): string {
+  private async generateAccessToken(user: User): Promise<string> {
     const payload: Partial<ICurrentUser> & { sub: number } = {
       sub: user.id,
       id: user.id,
@@ -198,8 +213,18 @@ export class AuthService {
         code: user.role.code,
         name: user.role.name,
       },
-      // theatreId
     };
+
+    // If THEATRE_ADMIN, fetch assigned theatre
+    if (user.role.code === ROLES.THEATRE_ADMIN) {
+      const assignment = await this.theatreAdminRepository.findOne({
+        where: { userId: user.id, status: TheatreAdminStatus.ACTIVE },
+      });
+
+      if (assignment) {
+        (payload as any).theatreId = assignment.theatreId;
+      }
+    }
 
     return this.jwtService.sign(payload);
   }
