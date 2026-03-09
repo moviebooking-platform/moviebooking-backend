@@ -1,8 +1,11 @@
 import * as crypto from 'crypto';
+import { Logger } from '@nestjs/common';
 
 const ALGORITHM = 'aes-256-gcm';
 const IV_LENGTH = 12;
 const AUTH_TAG_LENGTH = 16;
+
+const logger = new Logger('IdCipher');
 
 let encryptionKey: Buffer | null = null;
 
@@ -13,7 +16,7 @@ let encryptionKey: Buffer | null = null;
 export function initIdCipher(key?: string): void {
   const secretKey = key || process.env.ID_ENCRYPTION_KEY || '';
   if (!secretKey) {
-    console.warn('ID_ENCRYPTION_KEY not set - ID encryption disabled');
+    logger.warn('ID_ENCRYPTION_KEY not set - ID encryption disabled');
     return;
   }
   // Create 32-byte key from secret using SHA-256
