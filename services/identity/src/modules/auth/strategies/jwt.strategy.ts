@@ -14,7 +14,7 @@ interface JwtPayload {
     code: string;
     name: string;
   };
-  // theatreId
+  theatreId?: number;
 }
 
 @Injectable()
@@ -39,7 +39,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       email: payload.email,
       name: payload.name,
       role: payload.role,
-      // theatreId
+      theatreId: payload.theatreId,
     };
   }
 }

@@ -14,18 +14,18 @@ export class CreateUserDto {
   @IsEmail()
   email: string;
 
-@ApiProperty({ example: '<encrypted>', description: 'Encrypted Role ID' })
-@Transform(({ value }) => {
-  const id = decryptId(String(value));
-  if (id === null) {
-    throw new BadRequestException({
-      code: 'VALIDATION_ERROR',
-      message: 'Invalid roleId',
-    });
-  }
-  return id; 
-}, { toClassOnly: true })
-@IsInt()
-@Min(1)
-roleId: number;
+  @ApiProperty({ example: '<encrypted>', description: 'Encrypted Role ID' })
+  @Transform(({ value }) => {
+    const id = decryptId(String(value));
+    if (id === null) {
+      throw new BadRequestException({
+        code: 'VALIDATION_ERROR',
+        message: 'Invalid roleId',
+      });
+    }
+    return id;
+  }, { toClassOnly: true })
+  @IsInt()
+  @Min(1)
+  roleId: number;
 }
