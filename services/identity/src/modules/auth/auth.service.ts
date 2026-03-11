@@ -4,18 +4,54 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
-import { User, UserStatus, TheatreAdmin, TheatreAdminStatus } from '../../entities';
-import { throwError, ICurrentUser, ROLES, encryptId } from '@moviebooking/common';
+import { User, UserStatus } from '../../entities';
+import {
+  throwError,
+  ICurrentUser,
+  ROLES,
+  encryptId,
+} from '@moviebooking/common';
+import { TheatreClient } from '../../clients/theatre.client';
 import { LoginDto } from './dto/login.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+
+export interface RoleResponse {
+  id: string;
+  code: string;
+  name: string;
+}
+
+export interface UserResponse {
+  id: string;
+  name: string;
+  email: string;
+  role: RoleResponse;
+  assignedTheatreId?: string | null;
+}
+
+export interface LoginResponse {
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: number;
+  user: UserResponse;
+  mustChangePassword?: boolean;
+}
+
+export interface ProfileResponse {
+  id: string;
+  name: string;
+  email: string;
+  role: RoleResponse;
+  status: UserStatus;
+  assignedTheatreId?: string | null;
+}
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(TheatreAdmin)
-    private readonly theatreAdminRepository: Repository<TheatreAdmin>,
+    private readonly theatreClient: TheatreClient,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {}
@@ -49,10 +85,16 @@ export class AuthService {
       throwError('PASSWORD_EXPIRED');
     }
 
-    // Generate tokens
-    const tokens = await this.generateTokens(user);
+    // Fetch theatreId for Theatre Admin
+    let theatreId: number | null = null;
+    if (user.role.code === ROLES.THEATRE_ADMIN) {
+      theatreId = await this.theatreClient.getTheatreIdByUserId(user.id);
+    }
 
-    const response: any = {
+    // Generate tokens
+    const tokens = await this.generateTokens(user, theatreId);
+
+    const response: LoginResponse = {
       ...tokens,
       user: {
         id: encryptId(user.id),
@@ -73,12 +115,8 @@ export class AuthService {
 
     // Add assignedTheatreId for Theatre Admin role
     if (user.role.code === ROLES.THEATRE_ADMIN) {
-      const assignment = await this.theatreAdminRepository.findOne({
-        where: { userId: user.id, status: TheatreAdminStatus.ACTIVE },
-      });
-
-      response.user.assignedTheatreId = assignment
-        ? encryptId(assignment.theatreId)
+      response.user.assignedTheatreId = theatreId
+        ? encryptId(theatreId)
         : null;
     }
 
@@ -132,7 +170,7 @@ export class AuthService {
       throwError('NOT_FOUND', 'User not found');
     }
 
-    const profile: any = {
+    const profile: ProfileResponse = {
       id: encryptId(user.id),
       name: user.name,
       email: user.email,
@@ -144,22 +182,19 @@ export class AuthService {
       status: user.status,
     };
 
-    // Add assignedTheatreId for Theatre Admin role
+    // Add assignedTheatreId for Theatre Admin role 
     if (user.role.code === ROLES.THEATRE_ADMIN) {
-      const assignment = await this.theatreAdminRepository.findOne({
-        where: { userId: user.id, status: TheatreAdminStatus.ACTIVE },
-      });
-
-      profile.assignedTheatreId = assignment
-        ? encryptId(assignment.theatreId)
+      const theatreId = await this.theatreClient.getTheatreIdByUserId(user.id);
+      profile.assignedTheatreId = theatreId
+        ? encryptId(theatreId)
         : null;
     }
 
     return profile;
   }
 
-  private async generateTokens(user: User) {
-    const accessToken = await this.generateAccessToken(user);
+  private async generateTokens(user: User, theatreId: number | null = null) {
+    const accessToken = await this.generateAccessToken(user, theatreId);
 
     const refreshToken = this.jwtService.sign(
       { sub: user.id },
@@ -176,7 +211,7 @@ export class AuthService {
     };
   }
 
-   async refreshToken(refreshToken: string) {
+  async refreshToken(refreshToken: string) {
     try {
       const payload = this.jwtService.verify(refreshToken, {
         secret: this.configService.get('JWT_REFRESH_SECRET'),
@@ -191,7 +226,13 @@ export class AuthService {
         throwError('TOKEN_INVALID');
       }
 
-      const accessToken = await this.generateAccessToken(user);
+      // Fetch fresh theatreId for Theatre Admin
+      let theatreId: number | null = null;
+      if (user.role.code === ROLES.THEATRE_ADMIN) {
+        theatreId = await this.theatreClient.getTheatreIdByUserId(user.id);
+      }
+
+      const accessToken = await this.generateAccessToken(user, theatreId);
 
       return {
         accessToken,
@@ -202,7 +243,7 @@ export class AuthService {
     }
   }
 
-  private async generateAccessToken(user: User): Promise<string> {
+  private async generateAccessToken(user: User, theatreId: number | null = null): Promise<string> {
     const payload: Partial<ICurrentUser> & { sub: number } = {
       sub: user.id,
       id: user.id,
@@ -215,14 +256,10 @@ export class AuthService {
       },
     };
 
-    // If THEATRE_ADMIN, fetch assigned theatre
     if (user.role.code === ROLES.THEATRE_ADMIN) {
-      const assignment = await this.theatreAdminRepository.findOne({
-        where: { userId: user.id, status: TheatreAdminStatus.ACTIVE },
-      });
-
-      if (assignment) {
-        (payload as any).theatreId = assignment.theatreId;
+      const resolvedTheatreId = theatreId ?? await this.theatreClient.getTheatreIdByUserId(user.id);
+      if (resolvedTheatreId) {
+        payload.theatreId = resolvedTheatreId;
       }
     }
 

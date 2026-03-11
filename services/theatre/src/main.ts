@@ -11,7 +11,7 @@ import {
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  const logger = new Logger('IdentityService');
+  const logger = new Logger('TheatreService');
 
   // Initialize ID encryption
   initIdCipher();
@@ -21,8 +21,8 @@ async function bootstrap() {
 
   // Swagger configuration
   const config = new DocumentBuilder()
-    .setTitle('Identity Service API')
-    .setDescription('Authentication and user management API for Movie Ticket Booking System')
+    .setTitle('Theatre Service API')
+    .setDescription('Theatre, screen, and seat management API for Movie Ticket Booking System')
     .setVersion('1.0')
     .addBearerAuth(
       {
@@ -33,11 +33,8 @@ async function bootstrap() {
       },
       'JWT-auth',
     )
-    .addTag('auth', 'Authentication endpoints')
-    .addTag('users', 'User management endpoints')
-    .addTag('roles', 'Role management endpoints')
+    .addTag('theatres', 'Theatre management endpoints')
     .build();
-
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document, {
@@ -72,10 +69,10 @@ async function bootstrap() {
   // CORS
   app.enableCors();
 
-  const port = process.env.IDENTITY_SERVICE_PORT || 3001;
+  const port = process.env.THEATRE_SERVICE_PORT || 3002;
   await app.listen(port);
 
-  logger.log(`Identity Service running on port ${port}`);
+  logger.log(`Theatre Service running on port ${port}`);
   logger.log(`Swagger docs available at http://localhost:${port}/api/docs`);
 }
 

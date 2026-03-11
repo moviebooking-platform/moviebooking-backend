@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 class RoleDto {
-  @ApiProperty({ example: 1 })
-  id: number;
+  @ApiProperty({ example: 'a1b2c3d4', description: 'Encrypted role ID' })
+  id: string;
 
   @ApiProperty({ example: 'SUPER_ADMIN' })
   code: string;
@@ -12,8 +12,8 @@ class RoleDto {
 }
 
 class UserDto {
-  @ApiProperty({ example: 1 })
-  id: number;
+  @ApiProperty({ example: 'a1b2c3d4', description: 'Encrypted user ID' })
+  id: string;
 
   @ApiProperty({ example: 'John Doe' })
   name: string;
@@ -24,13 +24,13 @@ class UserDto {
   @ApiProperty({ type: RoleDto })
   role: RoleDto;
 
-  @ApiProperty({ 
-    example: null, 
-    nullable: true, 
+  @ApiProperty({
+    example: null,
+    nullable: true,
     required: false,
-    description: 'Only present for Theatre Admin users' 
+    description: 'Encrypted theatre ID, only present for Theatre Admin users',
   })
-  assignedTheatreId?: number | null;
+  assignedTheatreId?: string | null;
 }
 
 export class LoginResponseDto {
@@ -46,10 +46,10 @@ export class LoginResponseDto {
   @ApiProperty({ type: UserDto })
   user: UserDto;
 
-  @ApiProperty({ 
-    example: false, 
+  @ApiProperty({
+    example: false,
     required: false,
-    description: 'True if user must change password before proceeding' 
+    description: 'True if user must change password before proceeding',
   })
   mustChangePassword?: boolean;
 }
@@ -63,8 +63,8 @@ export class RefreshResponseDto {
 }
 
 export class ProfileResponseDto {
-  @ApiProperty({ example: 1 })
-  id: number;
+  @ApiProperty({ example: 'a1b2c3d4', description: 'Encrypted user ID' })
+  id: string;
 
   @ApiProperty({ example: 'John Doe' })
   name: string;
@@ -75,13 +75,13 @@ export class ProfileResponseDto {
   @ApiProperty({ type: RoleDto })
   role: RoleDto;
 
-  @ApiProperty({ 
-    example: null, 
-    nullable: true, 
+  @ApiProperty({
+    example: null,
+    nullable: true,
     required: false,
-    description: 'Only present for Theatre Admin users' 
+    description: 'Encrypted theatre ID, only present for Theatre Admin users',
   })
-  assignedTheatreId?: number | null;
+  assignedTheatreId?: string | null;
 
   @ApiProperty({ example: 'ACTIVE', enum: ['ACTIVE', 'DISABLED'] })
   status: string;

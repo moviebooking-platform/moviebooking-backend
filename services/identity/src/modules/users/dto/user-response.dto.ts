@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 class RoleDto {
-  @ApiProperty({ example: 1 })
-  id: number;
+  @ApiProperty({ example: 'a1b2c3d4', description: 'Encrypted role ID' })
+  id: string;
 
   @ApiProperty({ example: 'SUPER_ADMIN' })
   code: string;
@@ -12,8 +12,8 @@ class RoleDto {
 }
 
 export class UserResponseDto {
-  @ApiProperty({ example: 1 })
-  id: number;
+  @ApiProperty({ example: 'a1b2c3d4', description: 'Encrypted user ID' })
+  id: string;
 
   @ApiProperty({ example: 'John Doe' })
   name: string;
