@@ -6,6 +6,7 @@ export * from './dto/pagination.dto';
 export * from './decorators/current-user.decorator';
 export * from './decorators/decrypt-id.decorator';
 export * from './decorators/skip-transform.decorator';
+export * from './decorators/roles.decorator';
 
 // Filters
 export * from './filters/http-exception.filter';
@@ -16,6 +17,8 @@ export * from './interceptors/logging.interceptor';
 
 // Guards
 export * from './guards/roles.guard';
+export * from './guards/jwt-auth.guard';
+export * from './guards/optional-jwt-auth.guard';
 
 // Interfaces
 export * from './interfaces/current-user.interface';

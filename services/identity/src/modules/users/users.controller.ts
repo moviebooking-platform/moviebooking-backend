@@ -20,9 +20,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateStatusDto } from './dto/update-status.dto';
 import { ListUsersQueryDto } from './dto/list-users-query.dto';
 import { UserResponseDto, PaginatedUsersResponseDto } from './dto/user-response.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard, ROLES, DecryptId } from '@moviebooking/common';
-import { Roles } from './decorators/roles.decorator';
+import { JwtAuthGuard, RolesGuard, ROLES, DecryptId, Roles } from '@moviebooking/common';
 
 @ApiTags('users')
 @ApiBearerAuth('JWT-auth')

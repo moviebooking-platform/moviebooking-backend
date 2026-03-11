@@ -1,9 +1,7 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { RolesService } from './roles.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard, ROLES } from '@moviebooking/common';
-import { Roles } from './decorators/roles.decorator';
+import { JwtAuthGuard, RolesGuard, ROLES, Roles } from '@moviebooking/common';
 import { RoleResponseDto } from './dto/role-response.dto';
 
 @ApiTags('roles')

@@ -5,6 +5,7 @@ import { DevModule } from '@moviebooking/common';
 import { Theatre, TheatreAdmin, Screen, Seat } from './entities';
 import { User, Role } from '@moviebooking/database';
 import { InternalModule } from './modules/internal/internal.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 // Conditionally include DevModule only in development
 const devModules = process.env.NODE_ENV !== 'production' ? [DevModule] : [];
@@ -38,6 +39,7 @@ const devModules = process.env.NODE_ENV !== 'production' ? [DevModule] : [];
     }),
 
     // Feature modules
+    AuthModule,
     InternalModule,
 
     // Dev modules (only in non-production)
