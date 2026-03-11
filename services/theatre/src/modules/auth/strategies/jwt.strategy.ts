@@ -33,7 +33,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (!userId) {
       throw new AppException('TOKEN_INVALID');
     }
-   
+
     return {
       id: payload.id,
       email: payload.email,

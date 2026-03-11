@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOptionsWhere } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User, Role, UserStatus } from '../../entities';
-import { throwError, PaginatedResponse, generateTempPassword, encryptId, decryptId } from '@moviebooking/common';
+import { throwError, PaginatedResponse, generateTempPassword, encryptId } from '@moviebooking/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ListUsersQueryDto } from './dto/list-users-query.dto';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -73,8 +73,8 @@ export class UsersService {
     );
   }
 
-  async create(UserDto: CreateUserDto) {
-    const { email, name, roleId } = UserDto;
+  async create(createUserDto: CreateUserDto) {
+    const { email, name, roleId } = createUserDto;
 
     // Check if email exists
     const existingUser = await this.userRepository.findOne({

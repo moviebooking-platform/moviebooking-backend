@@ -19,8 +19,7 @@ import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { LoginResponseDto, RefreshResponseDto, ProfileResponseDto } from './dto/auth-response.dto';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
-import { CurrentUser, ICurrentUser } from '@moviebooking/common';
+import { JwtAuthGuard, CurrentUser, ICurrentUser } from '@moviebooking/common';
 
 @ApiTags('auth')
 @Controller('auth')
