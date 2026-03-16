@@ -27,6 +27,9 @@ export * from './interfaces/current-user.interface';
 export * from './constants/roles.constant';
 export * from './constants/error-codes.constant';
 
+// Exceptions
+export * from './exceptions/app.exception';
+
 // Utils
 export * from './utils/nanoid.util';
 export * from './utils/id-cipher.util';
