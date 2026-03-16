@@ -1,7 +1,8 @@
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
 
 /**
- * Error definitions with HTTP status codes
+ * Error definitions with HTTP status codes.
+ * Single source of truth for all error codes, messages, and statuses.
  */
 export const ERRORS = {
   // Validation
@@ -57,6 +58,33 @@ export const ERRORS = {
     status: HttpStatus.CONFLICT,
   },
 
+  // Database
+  DB_DUPLICATE_KEY: {
+    code: 'DUPLICATE_RESOURCE',
+    message: 'A record with the same value already exists',
+    status: HttpStatus.CONFLICT,
+  },
+  DB_FOREIGN_KEY_VIOLATION: {
+    code: 'VALIDATION_ERROR',
+    message: 'Referenced record does not exist or cannot be removed',
+    status: HttpStatus.BAD_REQUEST,
+  },
+  DB_NOT_NULL_VIOLATION: {
+    code: 'VALIDATION_ERROR',
+    message: 'A required field is missing',
+    status: HttpStatus.BAD_REQUEST,
+  },
+  DB_CONNECTION_ERROR: {
+    code: 'SERVICE_UNAVAILABLE',
+    message: 'Database connection unavailable',
+    status: HttpStatus.SERVICE_UNAVAILABLE,
+  },
+  DB_UNKNOWN_ERROR: {
+    code: 'INTERNAL_ERROR',
+    message: 'An unexpected database error occurred',
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+  },
+
   // Business Rules
   BUSINESS_RULE_VIOLATION: {
     code: 'BUSINESS_RULE_VIOLATION',
@@ -89,42 +117,3 @@ export type ErrorKey = keyof typeof ERRORS;
 
 // Type for error definition
 export type ErrorDefinition = (typeof ERRORS)[ErrorKey];
-
-export class AppException extends HttpException {
-  public readonly errorCode: string;
-
-  constructor(errorKey: ErrorKey, customMessage?: string) {
-    const error = ERRORS[errorKey];
-    const message = customMessage || error.message;
-
-    super({ code: error.code, message }, error.status);
-    this.errorCode = error.code;
-  }
-}
-
-/**
- * Get error with default message
- * Usage: getError('NOT_FOUND')
- */
-export function getError(key: ErrorKey): { code: string; message: string } {
-  return { code: ERRORS[key].code, message: ERRORS[key].message };
-}
-
-/**
- * Get error with custom message
- * Usage: getErrorWithMessage('NOT_FOUND', 'User not found')
- */
-export function getErrorWithMessage(
-  key: ErrorKey,
-  message: string,
-): { code: string; message: string } {
-  return { code: ERRORS[key].code, message };
-}
-
-/**
- * Throw application exception
- * Usage: throwError('NOT_FOUND', 'User not found')
- */
-export function throwError(key: ErrorKey, customMessage?: string): never {
-  throw new AppException(key, customMessage);
-}

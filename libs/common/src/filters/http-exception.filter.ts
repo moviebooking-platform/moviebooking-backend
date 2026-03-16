@@ -8,7 +8,8 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { errorResponse } from '../dto/api-response.dto';
-import { ERRORS, ErrorKey, AppException } from '../constants/error-codes.constant';
+import { ERRORS, ErrorKey } from '../constants/error-codes.constant';
+import { AppException } from '../exceptions/app.exception';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -54,6 +55,16 @@ export class HttpExceptionFilter implements ExceptionFilter {
         code = this.getErrorCodeFromStatus(status);
       }
     }
+    // Handle TypeORM / SQL Server database errors
+    else if (this.isDatabaseError(exception)) {
+      const dbError = this.mapDatabaseError(exception as Record<string, any>);
+      status = dbError.status;
+      code = dbError.code;
+      message = dbError.message;
+      this.logger.warn(
+        `Database error [${(exception as any).number || 'unknown'}]: ${(exception as Error).message}`,
+      );
+    }
     // Handle unknown errors
     else if (exception instanceof Error) {
       message = exception.message;
@@ -84,5 +95,55 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     const errorKey = statusToError[status] || 'INTERNAL_ERROR';
     return ERRORS[errorKey].code;
+  }
+
+  /**
+   * Detect TypeORM QueryFailedError or raw SQL Server errors.
+   * TypeORM wraps DB errors in QueryFailedError which has a `number` property
+   * (SQL Server error code) and `name === 'QueryFailedError'`.
+   */
+  private isDatabaseError(exception: unknown): boolean {
+    if (!(exception instanceof Error)) return false;
+    const err = exception as Record<string, any>;
+    return (
+      err.name === 'QueryFailedError' ||
+      typeof err.number === 'number' ||
+      err.code === 'EREQUEST' ||
+      err.code === 'ECONNCLOSED'
+    );
+  }
+
+  /**
+   * Map SQL Server error codes to our standard error format.
+   * Never expose raw DB error messages to clients.
+   *
+   * Common SQL Server error numbers:
+   * - 2627: Unique constraint violation (PRIMARY KEY or UNIQUE)
+   * - 2601: Unique index violation
+   * - 547:  Foreign key constraint violation
+   * - 515:  Cannot insert NULL into NOT NULL column
+   */
+  private mapDatabaseError(
+    exception: Record<string, any>,
+  ): { status: number; code: string; message: string } {
+    const sqlErrorNumber = exception.number as number | undefined;
+
+    switch (sqlErrorNumber) {
+      case 2627:
+      case 2601:
+        return ERRORS.DB_DUPLICATE_KEY;
+
+      case 547:
+        return ERRORS.DB_FOREIGN_KEY_VIOLATION;
+
+      case 515:
+        return ERRORS.DB_NOT_NULL_VIOLATION;
+
+      default:
+        if (exception.code === 'ECONNCLOSED') {
+          return ERRORS.DB_CONNECTION_ERROR;
+        }
+        return ERRORS.DB_UNKNOWN_ERROR;
+    }
   }
 }

@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
+import { InternalModule } from './modules/internal/internal.module';
 import { DevModule } from '@moviebooking/common';
 import { User, Role } from './entities';
 
@@ -41,6 +42,7 @@ const devModules = process.env.NODE_ENV !== 'production' ? [DevModule] : [];
     // Feature modules
     AuthModule,
     UsersModule,
+    InternalModule,
 
     // Dev modules (only in non-production)
     ...devModules,
