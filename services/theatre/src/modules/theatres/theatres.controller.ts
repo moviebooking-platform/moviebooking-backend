@@ -49,6 +49,7 @@ export class TheatresController {
 
   @Get()
   @UseGuards(OptionalJwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'List theatres', description: 'Paginated list. Unauthenticated: ACTIVE only. Super Admin: all statuses.' })
   @ApiResponse({ status: 200, description: 'Theatres retrieved' })
   async findAll(
@@ -60,6 +61,7 @@ export class TheatresController {
 
   @Get(':id')
   @UseGuards(OptionalJwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Get theatre detail', description: 'Theatre details with screen count' })
   @ApiParam({ name: 'id', type: String, description: 'Encrypted Theatre ID' })
   @ApiResponse({ status: 200, description: 'Theatre retrieved' })
