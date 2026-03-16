@@ -1,7 +1,6 @@
 import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { Theatre } from './theatre.entity';
-import { User } from './user.entity';
 import { TheatreAdminStatus } from '../enums';
 
 @Entity('theatre_admins')
@@ -15,10 +14,6 @@ export class TheatreAdmin extends BaseEntity {
 
   @Column({ name: 'user_id' })
   userId: number;
-
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'user_id' })
-  user: User;
 
   @Column({
     type: 'varchar',

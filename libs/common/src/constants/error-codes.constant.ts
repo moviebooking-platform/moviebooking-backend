@@ -57,6 +57,33 @@ export const ERRORS = {
     status: HttpStatus.CONFLICT,
   },
 
+  // Database
+  DB_DUPLICATE_KEY: {
+    code: 'DUPLICATE_RESOURCE',
+    message: 'A record with the same value already exists',
+    status: HttpStatus.CONFLICT,
+  },
+  DB_FOREIGN_KEY_VIOLATION: {
+    code: 'VALIDATION_ERROR',
+    message: 'Referenced record does not exist or cannot be removed',
+    status: HttpStatus.BAD_REQUEST,
+  },
+  DB_NOT_NULL_VIOLATION: {
+    code: 'VALIDATION_ERROR',
+    message: 'A required field is missing',
+    status: HttpStatus.BAD_REQUEST,
+  },
+  DB_CONNECTION_ERROR: {
+    code: 'SERVICE_UNAVAILABLE',
+    message: 'Database connection unavailable',
+    status: HttpStatus.SERVICE_UNAVAILABLE,
+  },
+  DB_UNKNOWN_ERROR: {
+    code: 'INTERNAL_ERROR',
+    message: 'An unexpected database error occurred',
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+  },
+
   // Business Rules
   BUSINESS_RULE_VIOLATION: {
     code: 'BUSINESS_RULE_VIOLATION',

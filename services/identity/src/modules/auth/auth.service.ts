@@ -92,7 +92,7 @@ export class AuthService {
     }
 
     // Generate tokens
-    const tokens = await this.generateTokens(user, theatreId);
+    const tokens = this.generateTokens(user, theatreId);
 
     const response: LoginResponse = {
       ...tokens,
@@ -193,8 +193,8 @@ export class AuthService {
     return profile;
   }
 
-  private async generateTokens(user: User, theatreId: number | null = null) {
-    const accessToken = await this.generateAccessToken(user, theatreId);
+  private generateTokens(user: User, theatreId: number | null = null) {
+    const accessToken = this.generateAccessToken(user, theatreId);
 
     const refreshToken = this.jwtService.sign(
       { sub: user.id },
@@ -232,7 +232,7 @@ export class AuthService {
         theatreId = await this.theatreClient.getTheatreIdByUserId(user.id);
       }
 
-      const accessToken = await this.generateAccessToken(user, theatreId);
+      const accessToken = this.generateAccessToken(user, theatreId);
 
       return {
         accessToken,
@@ -243,7 +243,7 @@ export class AuthService {
     }
   }
 
-  private async generateAccessToken(user: User, theatreId: number | null = null): Promise<string> {
+  private generateAccessToken(user: User, theatreId: number | null = null): string {
     const payload: Partial<ICurrentUser> & { sub: number } = {
       sub: user.id,
       id: user.id,
@@ -256,11 +256,8 @@ export class AuthService {
       },
     };
 
-    if (user.role.code === ROLES.THEATRE_ADMIN) {
-      const resolvedTheatreId = theatreId ?? await this.theatreClient.getTheatreIdByUserId(user.id);
-      if (resolvedTheatreId) {
-        payload.theatreId = resolvedTheatreId;
-      }
+    if (user.role.code === ROLES.THEATRE_ADMIN && theatreId) {
+      payload.theatreId = theatreId;
     }
 
     return this.jwtService.sign(payload);
