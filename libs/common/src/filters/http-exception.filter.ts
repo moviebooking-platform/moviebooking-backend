@@ -8,7 +8,8 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { errorResponse } from '../dto/api-response.dto';
-import { ERRORS, ErrorKey, AppException } from '../constants/error-codes.constant';
+import { ERRORS, ErrorKey } from '../constants/error-codes.constant';
+import { AppException } from '../exceptions/app.exception';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
