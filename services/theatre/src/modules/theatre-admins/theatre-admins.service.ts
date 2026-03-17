@@ -32,7 +32,7 @@ export class TheatreAdminsService {
 
     // Validate user has THEATRE_ADMIN role via Identity Service
     const user = await this.identityClient.getUserById(userId);
-
+    
     if (!user) {
       throwError('NOT_FOUND', 'User not found');
     }
