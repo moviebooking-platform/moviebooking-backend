@@ -7,7 +7,6 @@ import {
   PaginatedResponse,
   encryptId,
   ICurrentUser,
-  ROLES,
 } from '@moviebooking/common';
 import { CreateTheatreDto } from './dto/create-theatre.dto';
 import { UpdateTheatreDto } from './dto/update-theatre.dto';
@@ -34,12 +33,12 @@ export class TheatresService {
 
   async findAll(query: ListTheatresQueryDto, user?: ICurrentUser) {
     const { page = 1, pageSize = 20, city } = query;
-    const isSuperAdmin = user?.role?.code === ROLES.SUPER_ADMIN;
 
     const qb = this.theatreRepository.createQueryBuilder('theatre');
 
-    // Unauthenticated or non-Super Admin: ACTIVE only
-    if (!isSuperAdmin) {
+    // Guest (unauthenticated): ACTIVE only
+    // Authenticated users: all statuses
+    if (!user) {
       qb.where('theatre.status = :status', { status: TheatreStatus.ACTIVE });
     }
 
@@ -61,8 +60,16 @@ export class TheatresService {
     );
   }
 
-  async findOne(id: number) {
-    const theatre = await this.theatreRepository.findOne({ where: { id } });
+  async findOne(id: number, user?: ICurrentUser) {
+    const whereCondition: any = { id };
+    
+    // Guest (unauthenticated): ACTIVE only
+    // Authenticated users: all statuses
+    if (!user) {
+      whereCondition.status = TheatreStatus.ACTIVE;
+    }
+
+    const theatre = await this.theatreRepository.findOne({ where: whereCondition });
 
     if (!theatre) {
       throwError('NOT_FOUND', 'Theatre not found');

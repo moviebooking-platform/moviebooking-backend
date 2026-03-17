@@ -66,8 +66,11 @@ export class TheatresController {
   @ApiParam({ name: 'id', type: String, description: 'Encrypted Theatre ID' })
   @ApiResponse({ status: 200, description: 'Theatre retrieved' })
   @ApiResponse({ status: 404, description: 'Theatre not found' })
-  async findOne(@DecryptId('id') id: number) {
-    return this.theatresService.findOne(id);
+  async findOne(
+    @DecryptId('id') id: number,
+    @CurrentUser() user?: ICurrentUser,
+  ) {
+    return this.theatresService.findOne(id, user);
   }
 
   @Patch(':id')
