@@ -31,7 +31,7 @@ export class TheatresService {
     return this.mapResponse(saved);
   }
 
-  async findAll(query: ListTheatresQueryDto, user?: ICurrentUser) {
+  async findAll(query: ListTheatresQueryDto, user?: ICurrentUser) {    
     const { page = 1, pageSize = 20, city } = query;
 
     const qb = this.theatreRepository.createQueryBuilder('theatre');
