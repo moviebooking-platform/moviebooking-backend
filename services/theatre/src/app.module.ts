@@ -8,6 +8,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { TheatresModule } from './modules/theatres/theatres.module';
 import { TheatreAdminsModule } from './modules/theatre-admins/theatre-admins.module';
 import { ScreensModule } from './modules/screens/screens.module';
+import { SeatsModule } from './modules/seats/seats.module';
 
 // Conditionally include DevModule only in development
 const devModules = process.env.NODE_ENV !== 'production' ? [DevModule] : [];
@@ -46,6 +47,7 @@ const devModules = process.env.NODE_ENV !== 'production' ? [DevModule] : [];
     TheatresModule,
     TheatreAdminsModule,
     ScreensModule,
+    SeatsModule,
 
     // Dev modules (only in non-production)
     ...devModules,
