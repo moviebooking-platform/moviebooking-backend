@@ -34,6 +34,9 @@ async function bootstrap() {
       'JWT-auth',
     )
     .addTag('theatres', 'Theatre management endpoints')
+    .addTag('screens', 'Screen management endpoints')
+    .addTag('seats', 'Seat management endpoints')
+    .addTag('theatre-admins', 'Theatre admin assignment endpoints')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
