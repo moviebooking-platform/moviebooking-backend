@@ -14,5 +14,10 @@ export * from './entities/theatre-admin.entity';
 export * from './entities/screen.entity';
 export * from './entities/seat.entity';
 
+// Entities - M4: Movie Service
+export * from './entities/movie.entity';
+export * from './entities/movie-image.entity';
+export * from './entities/movie-request.entity';
+
 // Enums
 export * from './enums';
