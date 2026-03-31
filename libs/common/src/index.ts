@@ -33,6 +33,7 @@ export * from './exceptions/app.exception';
 // Utils
 export * from './utils/nanoid.util';
 export * from './utils/id-cipher.util';
+export * from './utils/date.util';
 
 // Modules
 export * from './modules/dev/dev.module';
