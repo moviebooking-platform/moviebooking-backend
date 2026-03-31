@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
-import { Movie, MovieImage, MovieRequest, MovieRequestStatus, MovieStatus } from '../../entities';
-import { throwError, PaginatedResponse, encryptId, ICurrentUser, ROLES } from '@moviebooking/common';
+import { Movie, MovieRequest, MovieRequestStatus, MovieStatus } from '../../entities';
+import { throwError, PaginatedResponse, encryptId, ICurrentUser, ROLES, formatUtcDate } from '@moviebooking/common';
 import { CreateMovieRequestDto } from './dto/create-movie-request.dto';
 import { ReviewMovieRequestDto } from './dto/review-movie-request.dto';
 import { ListMovieRequestsQueryDto } from './dto/list-movie-requests-query.dto';
@@ -180,11 +180,11 @@ export class MovieRequestsService {
       requestedByUserId: encryptId(request.requestedByUserId),
       title: request.title,
       description: request.description,
-      releaseDate: request.releaseDate,
+      releaseDate: formatUtcDate(request.releaseDate),
       cast: request.cast,
       director: request.director,
       language: request.language,
-      expectedReleaseDate: request.expectedReleaseDate,
+      expectedReleaseDate: formatUtcDate(request.expectedReleaseDate),
       notes: request.notes,
       status: request.status,
       reviewedByUserId: request.reviewedByUserId ? encryptId(request.reviewedByUserId) : null,

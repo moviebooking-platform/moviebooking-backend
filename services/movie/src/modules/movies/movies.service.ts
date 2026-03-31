@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Movie, MovieImage, MovieStatus } from '../../entities';
-import { throwError, PaginatedResponse, encryptId, ICurrentUser } from '@moviebooking/common';
+import { throwError, PaginatedResponse, encryptId, ICurrentUser, formatUtcDate } from '@moviebooking/common';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
 import { ListMoviesQueryDto } from './dto/list-movies-query.dto';
@@ -159,7 +159,7 @@ export class MoviesService {
       id: encryptId(movie.id),
       title: movie.title,
       description: movie.description,
-      releaseDate: movie.releaseDate,
+      releaseDate: formatUtcDate(movie.releaseDate),
       cast: movie.cast,
       director: movie.director,
       language: movie.language,
