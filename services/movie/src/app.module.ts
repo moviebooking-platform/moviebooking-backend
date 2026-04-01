@@ -7,6 +7,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { MoviesModule } from './modules/movies/movies.module';
 import { MovieImagesModule } from './modules/movie-images/movie-images.module';
 import { MovieRequestsModule } from './modules/movie-requests/movie-requests.module';
+import { InternalModule } from './modules/internal/internal.module';
 
 const devModules = process.env.NODE_ENV !== 'production' ? [DevModule] : [];
 
@@ -42,6 +43,7 @@ const devModules = process.env.NODE_ENV !== 'production' ? [DevModule] : [];
     MoviesModule,
     MovieImagesModule,
     MovieRequestsModule,
+    InternalModule,
 
     ...devModules,
   ],
