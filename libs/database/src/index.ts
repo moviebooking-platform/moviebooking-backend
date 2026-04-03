@@ -19,5 +19,9 @@ export * from './entities/movie.entity';
 export * from './entities/movie-image.entity';
 export * from './entities/movie-request.entity';
 
+// Entities - M5: Show Service
+export * from './entities/show.entity';
+export * from './entities/show-price.entity';
+
 // Enums
 export * from './enums';

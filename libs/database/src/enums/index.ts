@@ -41,3 +41,15 @@ export enum MovieRequestStatus {
   APPROVED = 'APPROVED',
   REJECTED = 'REJECTED',
 }
+
+// M5: Show Service enums
+export enum ShowStatus {
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
+}
+
+export enum ShowSeatStatus {
+  AVAILABLE = 'AVAILABLE',
+  HELD = 'HELD',
+  SOLD = 'SOLD',
+}
