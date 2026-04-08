@@ -22,6 +22,6 @@ export class ShowPrice extends BaseEntity {
   @Column({ name: 'amount', type: 'int' })
   amount: number;
 
-  @Column({ type: 'char', length: 3, default: 'USD' })
+  @Column({ type: 'char', length: 3, default: 'GBP' })
   currency: string;
 }
