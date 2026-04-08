@@ -3,11 +3,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DevModule } from '@moviebooking/common';
 import { Show, ShowPrice } from './entities';
+import { AuthModule } from './modules/auth/auth.module';
 
 const devModules = process.env.NODE_ENV !== 'production' ? [DevModule] : [];
 
 
-//  Configures database connection, imports feature modules, and conditionally includes dev tools.
+/** Root module for Show Service. Configures database, auth, and feature modules. */
  
 @Module({
   imports: [
@@ -37,6 +38,9 @@ const devModules = process.env.NODE_ENV !== 'production' ? [DevModule] : [];
         },
       }),
     }),
+
+    // Authentication
+    AuthModule,
 
     // Dev modules (only in non-production)
     ...devModules,
