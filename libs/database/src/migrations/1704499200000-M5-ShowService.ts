@@ -80,7 +80,7 @@ export class M5ShowService1704499200000 implements MigrationInterface {
         columnNames: ['screen_id'],
         referencedTableName: 'screens',
         referencedColumnNames: ['id'],
-        onDelete: 'RESTRICT',
+        onDelete: 'NO ACTION',
         name: 'fk_shows_screen',
       }),
     );
@@ -92,7 +92,7 @@ export class M5ShowService1704499200000 implements MigrationInterface {
         columnNames: ['movie_id'],
         referencedTableName: 'movies',
         referencedColumnNames: ['id'],
-        onDelete: 'RESTRICT',
+        onDelete: 'NO ACTION',
         name: 'fk_shows_movie',
       }),
     );
