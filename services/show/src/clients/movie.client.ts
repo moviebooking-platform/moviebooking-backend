@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
 import { BaseServiceClient } from '@moviebooking/common';
 
 export interface MovieDto {
@@ -16,6 +17,10 @@ export interface MovieDto {
  */
 @Injectable()
 export class MovieClient extends BaseServiceClient {
+  constructor(httpService: HttpService) {
+    super(httpService, 'MovieClient');
+  }
+
   /**
    * Fetches movie details by ID from Movie Service.
    * Returns null if movie not found.
