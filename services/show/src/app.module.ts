@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { DevModule } from '@moviebooking/common';
 import { Show, ShowPrice } from './entities';
 import { AuthModule } from './modules/auth/auth.module';
+import { ShowsModule } from './modules/shows/shows.module';
 
 const devModules = process.env.NODE_ENV !== 'production' ? [DevModule] : [];
 
@@ -41,6 +42,9 @@ const devModules = process.env.NODE_ENV !== 'production' ? [DevModule] : [];
 
     // Authentication
     AuthModule,
+
+    // Feature modules
+    ShowsModule,
 
     // Dev modules (only in non-production)
     ...devModules,
