@@ -5,6 +5,7 @@ import { DevModule } from '@moviebooking/common';
 import { Show, ShowPrice } from './entities';
 import { AuthModule } from './modules/auth/auth.module';
 import { ShowsModule } from './modules/shows/shows.module';
+import { ShowPricesModule } from './modules/show-prices/show-prices.module';
 
 const devModules = process.env.NODE_ENV !== 'production' ? [DevModule] : [];
 
@@ -45,6 +46,7 @@ const devModules = process.env.NODE_ENV !== 'production' ? [DevModule] : [];
 
     // Feature modules
     ShowsModule,
+    ShowPricesModule,
 
     // Dev modules (only in non-production)
     ...devModules,

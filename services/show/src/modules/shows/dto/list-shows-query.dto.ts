@@ -1,43 +1,36 @@
-import { IsInt, IsPositive, IsOptional, IsEnum, IsDateString } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsString, IsOptional, IsEnum, IsDateString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { PaginationQueryDto } from '@moviebooking/common';
 import { ShowStatus } from '@moviebooking/database';
 
 /** DTO for listing shows with filters. */
 export class ListShowsQueryDto extends PaginationQueryDto {
-  @ApiProperty({ example: 1, description: 'Filter by movie ID', required: false })
-  @IsInt()
-  @IsPositive()
+  @ApiProperty({ example: 'a3f8x2k', description: 'Filter by encrypted movie ID', required: false })
+  @IsString()
   @IsOptional()
-  @Type(() => Number)
-  movieId?: number;
+  movieId?: string;
 
-  @ApiProperty({ example: 1, description: 'Filter by theatre ID', required: false })
-  @IsInt()
-  @IsPositive()
+  @ApiProperty({ example: 'c5h2z8n', description: 'Filter by encrypted theatre ID', required: false })
+  @IsString()
   @IsOptional()
-  @Type(() => Number)
-  theatreId?: number;
+  theatreId?: string;
 
-  @ApiProperty({ example: 1, description: 'Filter by screen ID', required: false })
-  @IsInt()
-  @IsPositive()
+  @ApiProperty({ example: 'b7g9y4m', description: 'Filter by encrypted screen ID', required: false })
+  @IsString()
   @IsOptional()
-  @Type(() => Number)
-  screenId?: number;
+  screenId?: string;
 
-  @ApiProperty({ example: '2024-12-25', description: 'Filter by specific date (YYYY-MM-DD)', required: false })
+  @ApiProperty({ example: '2026-06-15', description: 'Filter by specific date (YYYY-MM-DD)', required: false })
   @IsDateString()
   @IsOptional()
   date?: string;
 
-  @ApiProperty({ example: '2024-12-01', description: 'Filter by start date (YYYY-MM-DD)', required: false })
+  @ApiProperty({ example: '2026-06-01', description: 'Filter by start date (YYYY-MM-DD)', required: false })
   @IsDateString()
   @IsOptional()
   fromDate?: string;
 
-  @ApiProperty({ example: '2024-12-31', description: 'Filter by end date (YYYY-MM-DD)', required: false })
+  @ApiProperty({ example: '2026-06-30', description: 'Filter by end date (YYYY-MM-DD)', required: false })
   @IsDateString()
   @IsOptional()
   toDate?: string;
