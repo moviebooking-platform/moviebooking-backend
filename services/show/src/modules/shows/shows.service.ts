@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, LessThan, MoreThan } from 'typeorm';
+import { Repository } from 'typeorm';
 import { Show, ShowStatus } from '../../entities';
-import { throwError, ICurrentUser, encryptId, formatUtcDateTime, ROLES } from '@moviebooking/common';
+import { throwError, ICurrentUser, encryptId, decryptId, formatUtcDateTime, ROLES } from '@moviebooking/common';
 import { CreateShowDto } from './dto/create-show.dto';
 import { UpdateShowDto } from './dto/update-show.dto';
 import { ListShowsQueryDto } from './dto/list-shows-query.dto';
@@ -21,13 +21,20 @@ export class ShowsService {
   ) {}
 
   async create(dto: CreateShowDto, user: ICurrentUser) {
+    const movieId = decryptId(dto.movieId);
+    const screenId = decryptId(dto.screenId);
+
+    if (!movieId || !screenId) {
+      throwError('VALIDATION_ERROR', 'Invalid movieId or screenId');
+    }
+
     // Validate screen ownership for Theatre Admin
     if (user.role.code === ROLES.THEATRE_ADMIN) {
-      await this.verifyScreenOwnership(dto.screenId, user.theatreId);
+      await this.verifyScreenOwnership(screenId, user.theatreId);
     }
 
     // Validate movie is active
-    await this.verifyMovieActive(dto.movieId);
+    await this.verifyMovieActive(movieId);
 
     // Validate time: startsAt in future, endsAt after startsAt
     const startsAt = new Date(dto.startsAt);
@@ -43,11 +50,11 @@ export class ShowsService {
     }
 
     // Check for overlapping shows
-    await this.checkOverlap(dto.screenId, startsAt, endsAt);
+    await this.checkOverlap(screenId, startsAt, endsAt);
 
     const show = this.showRepository.create({
-      screenId: dto.screenId,
-      movieId: dto.movieId,
+      screenId,
+      movieId,
       startsAt,
       endsAt,
       status: ShowStatus.ACTIVE,
@@ -61,6 +68,11 @@ export class ShowsService {
   async findAll(query: ListShowsQueryDto, user?: ICurrentUser) {
     const { page = 1, pageSize = 20, movieId, theatreId, screenId, date, fromDate, toDate, status } = query;
 
+    // Decrypt filter IDs
+    const decryptedMovieId = movieId ? decryptId(movieId) : undefined;
+    const decryptedTheatreId = theatreId ? decryptId(theatreId) : undefined;
+    const decryptedScreenId = screenId ? decryptId(screenId) : undefined;
+
     const qb = this.showRepository.createQueryBuilder('show');
 
     // Guest: ACTIVE only; authenticated: all or filtered by status
@@ -70,21 +82,20 @@ export class ShowsService {
       qb.where('show.status = :status', { status });
     }
 
-    if (movieId) {
-      qb.andWhere('show.movieId = :movieId', { movieId });
+    if (decryptedMovieId) {
+      qb.andWhere('show.movieId = :movieId', { movieId: decryptedMovieId });
     }
 
-    if (screenId) {
-      qb.andWhere('show.screenId = :screenId', { screenId });
+    if (decryptedScreenId) {
+      qb.andWhere('show.screenId = :screenId', { screenId: decryptedScreenId });
     }
 
     // Theatre filter requires fetching screens from Theatre Service
-    if (theatreId) {
-      const screen = await this.theatreClient.getScreen(screenId);
-      if (screen && screen.theatreId === theatreId) {
-        qb.andWhere('show.screenId = :screenId', { screenId });
+    if (decryptedTheatreId && !decryptedScreenId) {
+      const screen = await this.theatreClient.getScreen(decryptedScreenId);
+      if (screen && screen.theatreId === decryptedTheatreId) {
+        qb.andWhere('show.screenId = :screenId', { screenId: decryptedScreenId });
       } else {
-        // No matching screens, return empty
         return { data: [], total: 0, page, pageSize };
       }
     }

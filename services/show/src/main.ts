@@ -6,6 +6,7 @@ import {
   HttpExceptionFilter,
   LoggingInterceptor,
   TransformInterceptor,
+  initIdCipher,
 } from '@moviebooking/common';
 
 /**
@@ -15,6 +16,9 @@ import {
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
+
+  // Initialize ID encryption
+  initIdCipher();
 
   // Global prefix
   app.setGlobalPrefix('api');
