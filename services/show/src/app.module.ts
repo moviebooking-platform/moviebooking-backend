@@ -6,6 +6,8 @@ import { Show, ShowPrice } from './entities';
 import { AuthModule } from './modules/auth/auth.module';
 import { ShowsModule } from './modules/shows/shows.module';
 import { ShowPricesModule } from './modules/show-prices/show-prices.module';
+import { SeatAvailabilityModule } from './modules/seat-availability/seat-availability.module';
+import { InternalModule } from './modules/internal/internal.module';
 
 const devModules = process.env.NODE_ENV !== 'production' ? [DevModule] : [];
 
@@ -47,6 +49,8 @@ const devModules = process.env.NODE_ENV !== 'production' ? [DevModule] : [];
     // Feature modules
     ShowsModule,
     ShowPricesModule,
+    SeatAvailabilityModule,
+    InternalModule,
 
     // Dev modules (only in non-production)
     ...devModules,
