@@ -34,9 +34,9 @@ export class TheatreClient extends BaseServiceClient {
    * Fetches screen details by ID from Theatre Service.
    * Returns null if screen not found.
    */
-  async getScreen(screenId: number): Promise<ScreenDto | null> {
+  async getScreen(id: number): Promise<ScreenDto | null> {
     try {
-      return await this.get<ScreenDto>(`/api/internal/screens/${screenId}`);
+      return await this.get<ScreenDto>(`/api/internal/screens/${id}`);
     } catch (error) {
       if (error.response?.status === 404) {
         return null;

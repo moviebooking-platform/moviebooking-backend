@@ -31,8 +31,14 @@ export class ShowOwnershipGuard implements CanActivate {
 
       // For POST /shows, check screenId from body
       if (request.method === 'POST' && request.body?.screenId) {
-        const screen = await this.theatreClient.getScreen(request.body.screenId);
-        if (!screen || screen.theatreId !== user.theatreId) {
+        const decryptedScreenId = decryptId(request.body.screenId);
+        const screen = await this.theatreClient.getScreen(decryptedScreenId);
+
+        if (!screen) {
+          throw new AppException('NOT_FOUND', 'Screen not found');
+        }
+
+        if (screen.theatreId !== user.theatreId) {
           throw new AppException('FORBIDDEN', 'You can only create shows for your assigned theatre');
         }
         return true;
