@@ -36,4 +36,15 @@ export class InternalController {
   async getScreenById(@Param('id', ParseIntPipe) id: number) {
     return this.internalService.getScreenById(id);
   }
+
+  @Get('screens/:id/seats')
+  @ApiOperation({
+    summary: 'Get seats by screen ID',
+    description: 'Internal endpoint for Show/Booking Service to fetch all active seats for a screen',
+  })
+  @ApiParam({ name: 'id', type: Number })
+  @ApiResponse({ status: 200, description: 'Returns array of seats' })
+  async getSeatsByScreenId(@Param('id', ParseIntPipe) id: number) {
+    return this.internalService.getSeatsByScreenId(id);
+  }
 }
