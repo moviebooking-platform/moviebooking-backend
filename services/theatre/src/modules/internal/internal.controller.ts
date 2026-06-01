@@ -25,4 +25,15 @@ export class InternalController {
   ) {
     return this.internalService.getTheatreIdByUserId(userId);
   }
+
+  @Get('screens/:id')
+  @ApiOperation({
+    summary: 'Get screen by ID',
+    description: 'Internal endpoint for Show Service to fetch screen details and verify ownership',
+  })
+  @ApiParam({ name: 'id', type: Number })
+  @ApiResponse({ status: 200, description: 'Returns screen details or null' })
+  async getScreenById(@Param('id', ParseIntPipe) id: number) {
+    return this.internalService.getScreenById(id);
+  }
 }
