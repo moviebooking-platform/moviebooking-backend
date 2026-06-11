@@ -6,7 +6,14 @@ export interface ScreenDto {
   id: number;
   theatreId: number;
   name: string;
-  totalSeats: number;
+  status: string;
+}
+
+export interface TheatreDto {
+  id: number;
+  name: string;
+  city: string;
+  address: string;
   status: string;
 }
 
@@ -20,51 +27,46 @@ export interface SeatDto {
   status: string;
 }
 
-/**
- * Client for communicating with Theatre Service.
- * Provides methods to fetch screen and seat data for show scheduling and availability.
- */
+/** Client for the Theatre Service internal APIs. */
 @Injectable()
 export class TheatreClient extends BaseServiceClient {
   constructor(httpService: HttpService) {
     super(httpService, 'TheatreClient');
   }
 
-  /**
-   * Fetches screen details by ID from Theatre Service.
-   * Returns null if screen not found.
-   */
-  async getScreen(id: number): Promise<ScreenDto | null> {
-    try {
-      return await this.get<ScreenDto>(`/api/internal/screens/${id}`);
-    } catch (error) {
-      if (error.response?.status === 404) {
-        return null;
-      }
-      throw error;
-    }
+  /** Fetches a screen by ID. Returns null if not found or service unavailable. */
+  async getScreen(screenId: number): Promise<ScreenDto | null> {
+    return this.get<ScreenDto>(`/api/internal/screens/${screenId}`);
   }
 
-  /**
-   * Fetches all seats for a screen from Theatre Service.
-   * Used for seat availability calculations.
-   */
+  /** Fetches multiple screens in a single call. Returns empty array on failure. */
+  async getScreensByIds(screenIds: number[]): Promise<ScreenDto[]> {
+    if (!screenIds.length) return [];
+    const result = await this.post<ScreenDto[]>('/api/internal/screens/batch', { screenIds });
+    return result ?? [];
+  }
+
+  /** Fetches all active seats for a screen. */
   async getScreenSeats(screenId: number): Promise<SeatDto[]> {
-    return this.get<SeatDto[]>(`/api/internal/screens/${screenId}/seats`);
+    const result = await this.get<SeatDto[]>(`/api/internal/screens/${screenId}/seats`);
+    return result ?? [];
   }
 
-  /**
-   * Verifies that a screen belongs to a specific theatre.
-   * Returns true if screen belongs to theatre, false otherwise.
-   */
-  async verifyScreenOwnership(
-    screenId: number,
-    theatreId: number,
-  ): Promise<boolean> {
+  /** Fetches a theatre by ID. Returns null if not found or service unavailable. */
+  async getTheatre(theatreId: number): Promise<TheatreDto | null> {
+    return this.get<TheatreDto>(`/api/internal/theatres/${theatreId}`);
+  }
+
+  /** Fetches multiple theatres in a single call. Returns empty array on failure. */
+  async getTheatresByIds(theatreIds: number[]): Promise<TheatreDto[]> {
+    if (!theatreIds.length) return [];
+    const result = await this.post<TheatreDto[]>('/api/internal/theatres/batch', { theatreIds });
+    return result ?? [];
+  }
+
+  /** Verifies a screen belongs to a theatre. */
+  async verifyScreenOwnership(screenId: number, theatreId: number): Promise<boolean> {
     const screen = await this.getScreen(screenId);
-    if (!screen) {
-      return false;
-    }
-    return screen.theatreId === theatreId;
+    return screen?.theatreId === theatreId;
   }
 }
