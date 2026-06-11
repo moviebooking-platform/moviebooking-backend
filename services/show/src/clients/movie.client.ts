@@ -6,50 +6,38 @@ export interface MovieDto {
   id: number;
   title: string;
   status: string;
-  runningTimeMinutes: number | null;
-  releaseDate: Date;
+  description: string | null;
+  cast: string | null;
+  director: string | null;
   language: string | null;
+  runningTimeMinutes: number | null;
+  ratingValue: number | null;
+  releaseDate: Date;
+  primaryImageUrl: string | null;
 }
 
-/**
- * Client for communicating with Movie Service.
- * Provides methods to fetch movie data and validate movie status for show scheduling.
- */
+/** Client for the Movie Service internal APIs. */
 @Injectable()
 export class MovieClient extends BaseServiceClient {
   constructor(httpService: HttpService) {
     super(httpService, 'MovieClient');
   }
 
-  /**
-   * Fetches movie details by ID from Movie Service.
-   * Returns null if movie not found.
-   */
+  /** Fetches a single movie by ID. Returns null if not found or service unavailable. */
   async getMovie(movieId: number): Promise<MovieDto | null> {
-    try {
-      return await this.get<MovieDto>(`/api/internal/movies/${movieId}`);
-    } catch (error) {
-      if (error.response?.status === 404) {
-        return null;
-      }
-      throw error;
-    }
+    return this.get<MovieDto>(`/api/internal/movies/${movieId}`);
   }
 
-  /**
-   * Checks if a movie exists and has ACTIVE status.
-   * Returns true if movie is active, false if not found or inactive.
-   */
+  /** Fetches multiple movies in a single call. Returns empty array on failure. */
+  async getMoviesByIds(movieIds: number[]): Promise<MovieDto[]> {
+    if (!movieIds.length) return [];
+    const result = await this.post<MovieDto[]>('/api/internal/movies/batch', { movieIds });
+    return result ?? [];
+  }
+
+  /** Returns true only if the movie exists and has ACTIVE status. */
   async isMovieActive(movieId: number): Promise<boolean> {
-    try {
-      const movie = await this.getMovie(movieId);
-      if (!movie) {
-        return false;
-      }
-      return movie.status === 'ACTIVE';
-    } catch (error) {
-      // If service is unavailable, throw error to be handled by circuit breaker
-      throw error;
-    }
+    const movie = await this.getMovie(movieId);
+    return movie?.status === 'ACTIVE';
   }
 }

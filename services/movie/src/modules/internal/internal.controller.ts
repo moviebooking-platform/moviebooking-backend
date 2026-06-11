@@ -1,9 +1,9 @@
-import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiExcludeController } from '@nestjs/swagger';
 import { SkipTransform } from '@moviebooking/common';
 import { InternalService } from './internal.service';
 
-// Internal endpoints for service-to-service communication only
+/** Internal endpoints for service-to-service communication only. */
 @ApiExcludeController()
 @ApiTags('internal')
 @SkipTransform()
@@ -15,5 +15,11 @@ export class InternalController {
   @ApiOperation({ summary: 'Get movie by ID (internal)' })
   async getMovieById(@Param('id', ParseIntPipe) id: number) {
     return this.internalService.getMovieById(id);
+  }
+
+  @Post('movies/batch')
+  @ApiOperation({ summary: 'Get multiple movies by IDs (internal)' })
+  async getMoviesByIds(@Body() body: { movieIds: number[] }) {
+    return this.internalService.getMoviesByIds(body.movieIds ?? []);
   }
 }
