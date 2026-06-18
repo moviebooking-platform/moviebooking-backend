@@ -53,3 +53,19 @@ export enum ShowSeatStatus {
   HELD = 'HELD',
   SOLD = 'SOLD',
 }
+
+// M6: Booking Service enums
+export enum BookingStatus {
+  HOLDING = 'HOLDING',
+  PAYMENT_PENDING = 'PAYMENT_PENDING',
+  CONFIRMED = 'CONFIRMED',
+  FAILED = 'FAILED',
+  EXPIRED = 'EXPIRED',
+  PENDING_REVIEW = 'PENDING_REVIEW',
+}
+
+export enum SeatHoldStatus {
+  ACTIVE = 'ACTIVE',
+  EXPIRED = 'EXPIRED',
+  RELEASED = 'RELEASED',
+}
