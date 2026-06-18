@@ -23,5 +23,10 @@ export * from './entities/movie-request.entity';
 export * from './entities/show.entity';
 export * from './entities/show-price.entity';
 
+// Entities - M6: Booking Service
+export * from './entities/booking.entity';
+export * from './entities/booking-seat.entity';
+export * from './entities/seat-hold.entity';
+
 // Enums
 export * from './enums';
