@@ -6,7 +6,6 @@ import { SeatHold } from './seat-hold.entity';
 
 /**
  * Booking entity — a guest's attempt to purchase seats for one show.
- * Sole owner of booking state; transitions follow the booking state machine.
  */
 @Entity('bookings')
 @Index('idx_bookings_ref', ['bookingRef'], { unique: true })
@@ -28,7 +27,6 @@ export class Booking extends BaseEntity {
   @Column({ type: 'varchar', length: 20, default: BookingStatus.HOLDING })
   status: BookingStatus;
 
-  // Mirrors the seat-hold window; null until a hold exists.
   @Column({ name: 'hold_expires_at', type: 'datetime2', nullable: true })
   holdExpiresAt: Date | null;
 
@@ -38,7 +36,6 @@ export class Booking extends BaseEntity {
   @Column({ type: 'char', length: 3, default: 'GBP' })
   currency: string;
 
-  // Set when routed to PENDING_REVIEW (EC1).
   @Column({
     name: 'needs_review_reason',
     type: 'varchar',

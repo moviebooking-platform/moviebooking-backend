@@ -5,7 +5,6 @@ import { SeatType } from '../enums';
 
 /**
  * BookingSeat — a per-seat line of a booking with an immutable price snapshot.
- * show_id is denormalised so double-sell checks avoid a join back to bookings.
  */
 @Entity('booking_seats')
 @Index('uq_booking_seats_booking_seat', ['bookingId', 'seatId'], {

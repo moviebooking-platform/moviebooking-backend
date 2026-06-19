@@ -5,9 +5,6 @@ import { SeatHoldStatus } from '../enums';
 
 /**
  * SeatHold — a temporary reservation of one seat for one booking.
- * expires_at is the durable hold clock (independent of the Redis lock).
- * The filtered unique index on (show_id, seat_id) WHERE status='ACTIVE'
- * is created in the migration, not here.
  */
 @Entity('seat_holds')
 @Index('idx_seat_holds_booking', ['bookingId'])
@@ -30,7 +27,6 @@ export class SeatHold extends BaseEntity {
   @Column({ type: 'varchar', length: 20, default: SeatHoldStatus.ACTIVE })
   status: SeatHoldStatus;
 
-  // Durable hold clock — sole source of truth for hold validity.
   @Column({ name: 'expires_at', type: 'datetime2' })
   expiresAt: Date;
 }
