@@ -58,6 +58,19 @@ services:
     networks:
       - moviebooking-network
 
+  # RedisInsight - browser GUI for inspecting Redis (keys, TTLs, live MONITOR)
+  redis-insight:
+    image: redis/redisinsight:latest
+    container_name: moviebooking-redis-insight
+    ports:
+      - "5540:5540"
+    volumes:
+      - redis_insight_data:/data
+    depends_on:
+      - redis
+    networks:
+      - moviebooking-network
+
 volumes:
   sqlserver_data:
   rabbitmq_data:
