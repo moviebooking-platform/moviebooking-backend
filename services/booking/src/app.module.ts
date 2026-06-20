@@ -4,6 +4,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { DevModule } from '@moviebooking/common';
 import { Booking, BookingSeat, SeatHold } from './entities';
 import { AuthModule } from './modules/auth/auth.module';
+import { RedisModule } from './redis/redis.module';
 
 const devModules = process.env.NODE_ENV !== 'production' ? [DevModule] : [];
 
@@ -39,6 +40,9 @@ const devModules = process.env.NODE_ENV !== 'production' ? [DevModule] : [];
 
     // Authentication
     AuthModule,
+
+    // Redis seat-lock infrastructure (global)
+    RedisModule,
 
     // Dev modules (only in non-production)
     ...devModules,
