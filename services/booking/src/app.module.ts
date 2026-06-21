@@ -5,6 +5,7 @@ import { DevModule } from '@moviebooking/common';
 import { Booking, BookingSeat, SeatHold } from './entities';
 import { AuthModule } from './modules/auth/auth.module';
 import { RedisModule } from './redis/redis.module';
+import { MessagingModule } from './messaging/messaging.module';
 
 const devModules = process.env.NODE_ENV !== 'production' ? [DevModule] : [];
 
@@ -43,6 +44,9 @@ const devModules = process.env.NODE_ENV !== 'production' ? [DevModule] : [];
 
     // Redis seat-lock infrastructure (global)
     RedisModule,
+
+    // RabbitMQ event publishing (global)
+    MessagingModule,
 
     // Dev modules (only in non-production)
     ...devModules,
