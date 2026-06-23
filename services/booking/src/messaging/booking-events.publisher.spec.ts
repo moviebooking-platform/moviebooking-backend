@@ -38,7 +38,11 @@ describe('BookingEventsPublisher', () => {
     await publisher.publishConfirmed(payload);
 
     expect(publish).toHaveBeenCalledTimes(1);
-    expect(publish).toHaveBeenCalledWith(EXCHANGE, 'booking.confirmed', payload);
+    expect(publish).toHaveBeenCalledWith(
+      EXCHANGE,
+      'booking.confirmed',
+      payload,
+    );
   });
 
   it('publishes booking.expired with bookingRef and showId only', async () => {
