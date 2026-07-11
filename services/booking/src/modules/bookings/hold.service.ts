@@ -6,6 +6,7 @@ import { decryptId, throwError } from '@moviebooking/common';
 import { ShowStatus, SeatStatus } from '@moviebooking/database';
 import { ShowClient } from '../../clients/show.client';
 import { TheatreClient } from '../../clients/theatre.client';
+import { SeatLockService } from '../../redis/seat-lock.service';
 import { HoldSeatsDto } from './dto/hold-seats.dto';
 
 /** Validated seat data prepared for hold transaction. */
@@ -45,6 +46,7 @@ export class HoldService {
     private readonly configService: ConfigService,
     private readonly showClient: ShowClient,
     private readonly theatreClient: TheatreClient,
+    private readonly seatLockService: SeatLockService,
   ) {
     this.maxSeatsPerBooking = this.configService.get<number>(
       'MAX_SEATS_PER_BOOKING',
@@ -54,6 +56,56 @@ export class HoldService {
       'HOLD_LIFETIME_MINUTES',
       5,
     );
+  }
+
+  /**
+   * Phase 2: Acquires Redis locks for all seats in sorted order to prevent deadlock.
+   * Returns lock tokens on success, throws and releases all on failure.
+   */
+  private async acquireSeatsLocks(
+    seatIds: number[],
+    showId: number,
+  ): Promise<any[]> {
+    // Sort seat IDs to prevent deadlock (always acquire in same order)
+    const sortedSeatIds = [...seatIds].sort((a, b) => a - b);
+    const acquiredTokens: any[] = [];
+
+    try {
+      for (const seatId of sortedSeatIds) {
+        this.logger.debug(`Acquiring lock for seat ${seatId} in show ${showId}`);
+        const token = await this.seatLockService.acquire(showId, seatId);
+        acquiredTokens.push(token);
+      }
+
+      this.logger.debug(
+        `Successfully acquired ${acquiredTokens.length} seat locks`,
+      );
+      return acquiredTokens;
+    } catch (error) {
+      // Release all locks acquired so far
+      this.logger.warn(
+        `Lock acquisition failed, releasing ${acquiredTokens.length} locks`,
+      );
+      await this.releaseAllLocks(acquiredTokens);
+      throw error;
+    }
+  }
+
+  /**
+   * Phase 4: Releases all acquired Redis locks. Always called in finally block.
+   */
+  private async releaseAllLocks(tokens: any[]): Promise<void> {
+    if (!tokens || tokens.length === 0) return;
+
+    await Promise.all(
+      tokens.map((token) =>
+        this.seatLockService.release(token).catch((err) => {
+          this.logger.error(`Failed to release lock: ${err.message}`);
+        }),
+      ),
+    );
+
+    this.logger.debug(`Released ${tokens.length} seat locks`);
   }
 
   /**
