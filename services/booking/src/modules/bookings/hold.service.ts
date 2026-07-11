@@ -1,19 +1,29 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { decryptId, throwError } from '@moviebooking/common';
-import { ShowStatus, SeatStatus } from '@moviebooking/database';
+import {
+  ShowStatus,
+  SeatStatus,
+  SeatType,
+  Booking,
+  BookingSeat,
+  SeatHold,
+  BookingStatus,
+  SeatHoldStatus,
+} from '@moviebooking/database';
 import { ShowClient } from '../../clients/show.client';
 import { TheatreClient } from '../../clients/theatre.client';
 import { SeatLockService } from '../../redis/seat-lock.service';
+import { BookingRefGenerator } from './booking-ref.generator';
 import { HoldSeatsDto } from './dto/hold-seats.dto';
 
 /** Validated seat data prepared for hold transaction. */
 interface PreparedSeat {
   seatId: number;
   seatCode: string;
-  seatType: string;
+  seatType: SeatType;
   priceCents: number;
 }
 
@@ -43,10 +53,17 @@ export class HoldService {
 
   constructor(
     @InjectDataSource() private readonly dataSource: DataSource,
+    @InjectRepository(Booking)
+    private readonly bookingRepo: Repository<Booking>,
+    @InjectRepository(BookingSeat)
+    private readonly bookingSeatRepo: Repository<BookingSeat>,
+    @InjectRepository(SeatHold)
+    private readonly seatHoldRepo: Repository<SeatHold>,
     private readonly configService: ConfigService,
     private readonly showClient: ShowClient,
     private readonly theatreClient: TheatreClient,
     private readonly seatLockService: SeatLockService,
+    private readonly bookingRefGenerator: BookingRefGenerator,
   ) {
     this.maxSeatsPerBooking = this.configService.get<number>(
       'MAX_SEATS_PER_BOOKING',
@@ -55,6 +72,171 @@ export class HoldService {
     this.holdLifetimeMinutes = this.configService.get<number>(
       'HOLD_LIFETIME_MINUTES',
       5,
+    );
+  }
+
+  /**
+   * Creates a seat hold with 4-phase flow: validate → lock → transaction → cleanup.
+   * This is the main entry point for hold creation.
+   */
+  async holdSeats(dto: HoldSeatsDto): Promise<Booking> {
+    this.logger.log(`Creating hold for ${dto.seatIds.length} seats`);
+
+    // Phase 1: Pre-transaction validation
+    const validatedData = await this.validateHoldRequest(dto);
+
+    let lockTokens: any[] = [];
+
+    try {
+      // Phase 2: Acquire Redis locks
+      lockTokens = await this.acquireSeatsLocks(
+        validatedData.seats.map((s) => s.seatId),
+        validatedData.showId,
+      );
+
+      // Phase 3: Database transaction
+      const booking = await this.createHoldTransaction(validatedData);
+
+      this.logger.log(
+        `Hold created successfully: ${booking.bookingRef} (${booking.id})`,
+      );
+      return booking;
+    } finally {
+      // Phase 4: Always release locks (even if transaction failed)
+      await this.releaseAllLocks(lockTokens);
+    }
+  }
+
+  /**
+   * Phase 3: Creates booking, booking_seats, and seat_holds in a transaction.
+   * Re-checks availability before insert to catch race conditions.
+   */
+  private async createHoldTransaction(
+    data: ValidatedHoldData,
+  ): Promise<Booking> {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      // Re-check: Are any seats now SOLD (confirmed booking)?
+      const soldSeats = await queryRunner.manager
+        .createQueryBuilder(BookingSeat, 'bs')
+        .innerJoin(Booking, 'b', 'b.id = bs.booking_id')
+        .where('bs.show_id = :showId', { showId: data.showId })
+        .andWhere('bs.seat_id IN (:...seatIds)', {
+          seatIds: data.seats.map((s) => s.seatId),
+        })
+        .andWhere('b.status = :status', { status: BookingStatus.CONFIRMED })
+        .select('bs.seat_id', 'seatId')
+        .getRawMany<{ seatId: number }>();
+
+      if (soldSeats.length > 0) {
+        await queryRunner.rollbackTransaction();
+        throwError(
+          'BUSINESS_RULE_VIOLATION',
+          `Seats ${soldSeats.map((s) => s.seatId).join(', ')} are already sold`,
+        );
+      }
+
+      // Re-check: Are any seats currently HELD (active hold)?
+      const heldSeats = await queryRunner.manager
+        .createQueryBuilder(SeatHold, 'h')
+        .where('h.show_id = :showId', { showId: data.showId })
+        .andWhere('h.seat_id IN (:...seatIds)', {
+          seatIds: data.seats.map((s) => s.seatId),
+        })
+        .andWhere('h.status = :status', { status: SeatHoldStatus.ACTIVE })
+        .andWhere('h.expires_at > :now', { now: new Date() })
+        .select('h.seat_id', 'seatId')
+        .getRawMany<{ seatId: number }>();
+
+      if (heldSeats.length > 0) {
+        await queryRunner.rollbackTransaction();
+        throwError(
+          'BUSINESS_RULE_VIOLATION',
+          `Seats ${heldSeats.map((s) => s.seatId).join(', ')} are currently held`,
+        );
+      }
+
+      // Generate unique booking reference
+      const bookingRef =
+        await this.bookingRefGenerator.generateUniqueRef(queryRunner.manager);
+
+      // Insert booking
+      const booking = queryRunner.manager.create(Booking, {
+        bookingRef,
+        showId: data.showId,
+        email: data.email,
+        status: BookingStatus.HOLDING,
+        totalAmountCents: data.totalAmountCents,
+        currency: data.currency,
+        holdExpiresAt: data.holdExpiresAt,
+      });
+      await queryRunner.manager.save(booking);
+
+      // Insert booking_seats (price snapshots)
+      const bookingSeats = data.seats.map((seat) =>
+        queryRunner.manager.create(BookingSeat, {
+          bookingId: booking.id,
+          showId: data.showId,
+          seatId: seat.seatId,
+          seatType: seat.seatType,
+          priceCents: seat.priceCents,
+        }),
+      );
+      await queryRunner.manager.save(bookingSeats);
+
+      // Insert seat_holds
+      const seatHolds = data.seats.map((seat) =>
+        queryRunner.manager.create(SeatHold, {
+          bookingId: booking.id,
+          showId: data.showId,
+          seatId: seat.seatId,
+          status: SeatHoldStatus.ACTIVE,
+          expiresAt: data.holdExpiresAt,
+        }),
+      );
+      await queryRunner.manager.save(seatHolds);
+
+      await queryRunner.commitTransaction();
+
+      this.logger.debug(
+        `Transaction committed: booking ${bookingRef}, ${bookingSeats.length} seats`,
+      );
+
+      // Load the full booking with relationships
+      return await this.bookingRepo.findOne({
+        where: { id: booking.id },
+        relations: ['seats', 'holds'],
+      });
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+
+      // Handle filtered-index violation (seat already held)
+      if (this.isDuplicateConstraintError(error)) {
+        this.logger.warn('Duplicate seat hold detected (filtered index)');
+        throwError(
+          'BUSINESS_RULE_VIOLATION',
+          'One or more seats are already held by another booking',
+        );
+      }
+
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  /** Checks if error is a unique constraint violation. */
+  private isDuplicateConstraintError(error: any): boolean {
+    return (
+      error.code === 'ER_DUP_ENTRY' || // MySQL
+      error.code === '23505' || // PostgreSQL
+      error.number === 2601 || // SQL Server unique index
+      error.number === 2627 || // SQL Server unique constraint
+      error.message?.includes('UNIQUE constraint') ||
+      error.message?.includes('duplicate key')
     );
   }
 
@@ -175,7 +357,7 @@ export class HoldService {
       preparedSeats.push({
         seatId: seat.id,
         seatCode: seat.seatCode,
-        seatType: seat.seatType,
+        seatType: seat.seatType as SeatType,
         priceCents: 0, // Will be filled with price
       });
     }
