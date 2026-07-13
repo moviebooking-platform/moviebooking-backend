@@ -1,8 +1,18 @@
-import { Controller, Post, Get, Body, Param, Logger } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Delete,
+  Body,
+  Param,
+  HttpCode,
+  Logger,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { encryptId, formatUtcDateTime } from '@moviebooking/common';
 import { HoldService } from './hold.service';
 import { BookingQueryService } from './booking-query.service';
+import { BookingCancelService } from './booking-cancel.service';
 import { HoldSeatsDto } from './dto/hold-seats.dto';
 import { BookingResponse, BookingSeatResponse } from './dto/booking-response.dto';
 
@@ -15,6 +25,7 @@ export class BookingsController {
   constructor(
     private readonly holdService: HoldService,
     private readonly bookingQueryService: BookingQueryService,
+    private readonly bookingCancelService: BookingCancelService,
   ) {}
 
   @Post('hold')
@@ -61,6 +72,31 @@ export class BookingsController {
     const booking = await this.bookingQueryService.getByReferenceOrFail(bookingRef);
 
     return this.mapBookingResponse(booking);
+  }
+
+  @Delete(':bookingRef')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Cancel a booking (guest cancellation)' })
+  @ApiResponse({
+    status: 200,
+    description: 'Booking cancelled successfully',
+    type: BookingResponse,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Booking not found',
+  })
+  @ApiResponse({
+    status: 422,
+    description: 'Business rule violation (cannot cancel confirmed/expired booking)',
+  })
+  async cancelBooking(@Param('bookingRef') bookingRef: string): Promise<BookingResponse> {
+    this.logger.log(`Cancel request for booking: ${bookingRef}`);
+
+    const booking = await this.bookingQueryService.getByReferenceOrFail(bookingRef);
+    const cancelledBooking = await this.bookingCancelService.cancelBooking(booking);
+
+    return this.mapBookingResponse(cancelledBooking);
   }
 
   /** Maps booking entity to API response with encrypted IDs and calculated remaining time. */
