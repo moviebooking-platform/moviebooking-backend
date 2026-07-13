@@ -5,6 +5,7 @@ import { DevModule } from '@moviebooking/common';
 import { Booking, BookingSeat, SeatHold } from './entities';
 import { AuthModule } from './modules/auth/auth.module';
 import { AvailabilityModule } from './modules/availability/availability.module';
+import { BookingsModule } from './modules/bookings/bookings.module';
 import { RedisModule } from './redis/redis.module';
 import { MessagingModule } from './messaging/messaging.module';
 
@@ -45,6 +46,9 @@ const devModules = process.env.NODE_ENV !== 'production' ? [DevModule] : [];
 
     // Seat availability (read path)
     AvailabilityModule,
+
+    // Seat hold and booking management (write path)
+    BookingsModule,
 
     // Redis seat-lock infrastructure (global)
     RedisModule,
