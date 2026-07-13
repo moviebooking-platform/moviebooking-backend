@@ -6,6 +6,7 @@ import { TheatreClientModule } from '../../clients/theatre-client.module';
 import { RedisModule } from '../../redis/redis.module';
 import { BookingsController } from './bookings.controller';
 import { HoldService } from './hold.service';
+import { BookingQueryService } from './booking-query.service';
 import { BookingRefGenerator } from './booking-ref.generator';
 
 @Module({
@@ -16,7 +17,7 @@ import { BookingRefGenerator } from './booking-ref.generator';
     RedisModule, // Provides SeatLockService
   ],
   controllers: [BookingsController],
-  providers: [HoldService, BookingRefGenerator],
-  exports: [HoldService],
+  providers: [HoldService, BookingQueryService, BookingRefGenerator],
+  exports: [HoldService, BookingQueryService],
 })
 export class BookingsModule {}
