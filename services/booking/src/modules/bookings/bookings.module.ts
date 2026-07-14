@@ -10,6 +10,7 @@ import { HoldService } from './hold.service';
 import { BookingQueryService } from './booking-query.service';
 import { BookingCancelService } from './booking-cancel.service';
 import { BookingRefGenerator } from './booking-ref.generator';
+import { TheatreBookingScopeService } from './theatre-booking-scope.service';
 
 @Module({
   imports: [
@@ -25,7 +26,13 @@ import { BookingRefGenerator } from './booking-ref.generator';
     BookingQueryService,
     BookingCancelService,
     BookingRefGenerator,
+    TheatreBookingScopeService,
   ],
-  exports: [HoldService, BookingQueryService, BookingCancelService],
+  exports: [
+    HoldService,
+    BookingQueryService,
+    BookingCancelService,
+    TheatreBookingScopeService,
+  ],
 })
 export class BookingsModule {}
