@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { ICurrentUser } from '@moviebooking/common';
 import { ShowClient } from '../../clients/show.client';
 import { TheatreClient } from '../../clients/theatre.client';
 
@@ -10,16 +9,14 @@ export class TheatreBookingScopeService {
     private readonly showClient: ShowClient,
   ) {}
 
-  async resolveShowIdsForCurrentUser(
-    currentUser: ICurrentUser,
+  async getAccessibleShowIds(
+    theatreId: number | null,
   ): Promise<number[]> {
-    if (currentUser.theatreId == null) {
+    if (theatreId == null) {
       return [];
     }
 
-    const screenIds = await this.theatreClient.getScreensByTheatre(
-      currentUser.theatreId,
-    );
+    const screenIds = await this.theatreClient.getScreensByTheatre(theatreId);
 
     if (screenIds.length === 0) {
       return [];
