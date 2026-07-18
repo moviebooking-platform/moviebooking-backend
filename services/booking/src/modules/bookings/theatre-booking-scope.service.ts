@@ -11,13 +11,13 @@ export class TheatreBookingScopeService {
 
   async getAccessibleShowIds(
     theatreId: number | null,
-  ): Promise<number[]> {
+  ): Promise<number[]> {    
     if (theatreId == null) {
       return [];
     }
 
-    const screenIds = await this.theatreClient.getScreensByTheatre(theatreId);
-
+    const screenIds = await this.theatreClient.getScreensByTheatre(theatreId);    
+    
     if (screenIds.length === 0) {
       return [];
     }
