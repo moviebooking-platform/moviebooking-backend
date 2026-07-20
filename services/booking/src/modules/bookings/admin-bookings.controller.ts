@@ -1,7 +1,8 @@
-import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
+  ApiParam,
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
@@ -14,6 +15,7 @@ import {
   ROLES,
 } from '@moviebooking/common';
 import { AdminBookingQueryService } from './admin-booking-query.service';
+import { AdminBookingDetailResponseDto } from './dto/admin-booking-detail-response.dto';
 import { ListBookingsQueryDto } from './dto/list-bookings-query.dto';
 
 @ApiTags('Admin Bookings')
@@ -36,5 +38,32 @@ export class AdminBookingsController {
     @CurrentUser() currentUser: ICurrentUser,
   ) {
     return this.adminBookingQueryService.listBookings(query, currentUser);
+  }
+
+  @Get(':id/admin')
+  @ApiOperation({ summary: 'Get full booking detail for administration' })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    description: 'Encrypted booking ID',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Booking detail retrieved',
+    type: AdminBookingDetailResponseDto,
+  })
+  @ApiResponse({ status: 400, description: 'Invalid booking ID' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden' })
+  @ApiResponse({ status: 404, description: 'Booking or dependency not found' })
+  @ApiResponse({ status: 503, description: 'Dependent service unavailable' })
+  async getBookingDetail(
+    @Param('id') encryptedBookingId: string,
+    @CurrentUser() currentUser: ICurrentUser,
+  ): Promise<AdminBookingDetailResponseDto> {
+    return this.adminBookingQueryService.getBookingDetail(
+      encryptedBookingId,
+      currentUser,
+    );
   }
 }

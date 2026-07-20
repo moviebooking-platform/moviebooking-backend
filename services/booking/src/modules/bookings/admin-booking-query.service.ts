@@ -11,7 +11,10 @@ import {
   throwError,
 } from '@moviebooking/common';
 import { Repository } from 'typeorm';
+import { ShowClient } from '../../clients/show.client';
+import { TheatreClient } from '../../clients/theatre.client';
 import { TheatreBookingScopeService } from './theatre-booking-scope.service';
+import { AdminBookingDetailResponseDto } from './dto/admin-booking-detail-response.dto';
 import { ListBookingsQueryDto } from './dto/list-bookings-query.dto';
 import { AdminBookingSummaryResponseDto } from './dto/admin-booking-summary-response.dto';
 
@@ -21,6 +24,8 @@ export class AdminBookingQueryService {
     @InjectRepository(Booking)
     private readonly bookingRepository: Repository<Booking>,
     private readonly theatreBookingScopeService: TheatreBookingScopeService,
+    private readonly showClient: ShowClient,
+    private readonly theatreClient: TheatreClient,
   ) {}
 
   async listBookings(
@@ -29,7 +34,6 @@ export class AdminBookingQueryService {
   ): Promise<PaginatedResponse<AdminBookingSummaryResponseDto>> {
     const { page = 1, pageSize = 20 } = query;
     const accessibleShowIds = await this.resolveAccessibleShowIds(currentUser);
-    
 
     if (accessibleShowIds?.length === 0) {
       return new PaginatedResponse([], 0, page, pageSize);
@@ -101,6 +105,87 @@ export class AdminBookingQueryService {
     );
   }
 
+  async getBookingDetail(
+    encryptedBookingId: string,
+    currentUser: ICurrentUser,
+  ): Promise<AdminBookingDetailResponseDto> {
+    const bookingId = this.decryptBookingId(encryptedBookingId);
+    const booking = await this.bookingRepository.findOne({
+      where: { id: bookingId },
+      relations: ['seats', 'holds'],
+    });
+
+    if (!booking) {
+      throwError('NOT_FOUND', 'Booking not found');
+    }
+
+    if (currentUser.role.code === ROLES.THEATRE_ADMIN) {
+      if (!currentUser.theatreId) {
+        throwError('FORBIDDEN');
+      }
+    } else if (currentUser.role.code !== ROLES.SUPER_ADMIN) {
+      throwError('FORBIDDEN');
+    }
+
+    const show = await this.showClient.getShow(booking.showId);
+    if (!show) {
+      throwError('NOT_FOUND', 'Show not found');
+    }
+
+    const screen = await this.theatreClient.getScreen(show.screenId);
+    if (!screen) {
+      throwError('NOT_FOUND', 'Screen not found');
+    }
+
+    if (
+      currentUser.role.code === ROLES.THEATRE_ADMIN &&
+      screen.theatreId !== currentUser.theatreId
+    ) {
+      throwError('FORBIDDEN');
+    }
+
+    const screenSeats = await this.theatreClient.getScreenSeats(screen.id);
+    if (screenSeats === null) {
+      throwError('NOT_FOUND', 'Screen not found');
+    }
+    if (booking.seats.length > 0 && screenSeats.length === 0) {
+      throwError('SERVICE_UNAVAILABLE', 'Unable to retrieve seat information');
+    }
+
+    const seatById = new Map(screenSeats.map((seat) => [seat.id, seat]));
+    const seats = booking.seats.map((bookingSeat) => {
+      const seat = seatById.get(bookingSeat.seatId);
+      if (!seat) {
+        throwError(
+          'SERVICE_UNAVAILABLE',
+          'Required seat metadata is unavailable',
+        );
+      }
+
+      return {
+        seatId: encryptId(bookingSeat.seatId),
+        seatCode: seat.seatCode,
+        seatType: bookingSeat.seatType,
+        priceCents: bookingSeat.priceCents,
+      };
+    });
+
+    return {
+      id: encryptId(booking.id),
+      bookingRef: booking.bookingRef,
+      showId: encryptId(booking.showId),
+      email: booking.email,
+      status: booking.status,
+      seats,
+      totalAmountCents: booking.totalAmountCents,
+      currency: booking.currency,
+      holdExpiresAt: formatUtcDateTime(booking.holdExpiresAt),
+      needsReviewReason: booking.needsReviewReason,
+      createdAt: formatUtcDateTime(booking.createdAt),
+      updatedAt: formatUtcDateTime(booking.updatedAt),
+    };
+  }
+
   private async resolveAccessibleShowIds(
     currentUser: ICurrentUser,
   ): Promise<number[] | undefined> {
@@ -108,12 +193,19 @@ export class AdminBookingQueryService {
       return undefined;
     }
     if (currentUser.role.code === ROLES.THEATRE_ADMIN) {
-        
       return this.theatreBookingScopeService.getAccessibleShowIds(
         currentUser.theatreId ?? null,
       );
     }
     throwError('FORBIDDEN');
+  }
+
+  private decryptBookingId(encryptedBookingId: string): number {
+    const bookingId = decryptId(encryptedBookingId);
+    if (bookingId === null || !Number.isInteger(bookingId) || bookingId <= 0) {
+      throwError('VALIDATION_ERROR', 'Invalid booking ID');
+    }
+    return bookingId;
   }
 
   private decryptShowId(showId?: string): number | undefined {
@@ -133,6 +225,7 @@ export class AdminBookingQueryService {
 
   private mapSummary(booking: Booking): AdminBookingSummaryResponseDto {
     return {
+      id: encryptId(booking.id),
       bookingRef: booking.bookingRef,
       showId: encryptId(booking.showId),
       email: booking.email,

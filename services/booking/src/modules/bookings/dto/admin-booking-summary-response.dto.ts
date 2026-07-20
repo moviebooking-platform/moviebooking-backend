@@ -2,6 +2,9 @@ import { ApiProperty } from '@nestjs/swagger';
 import { BookingStatus } from '@moviebooking/database';
 
 export class AdminBookingSummaryResponseDto {
+  @ApiProperty({ description: 'Encrypted booking ID' })
+  id: string;
+
   @ApiProperty()
   bookingRef: string;
 
