@@ -17,6 +17,7 @@ import { TheatreBookingScopeService } from './theatre-booking-scope.service';
 import { AdminBookingDetailResponseDto } from './dto/admin-booking-detail-response.dto';
 import { ListBookingsQueryDto } from './dto/list-bookings-query.dto';
 import { AdminBookingSummaryResponseDto } from './dto/admin-booking-summary-response.dto';
+import { mapReservationTiming } from './reservation-timing.mapper';
 
 @Injectable()
 export class AdminBookingQueryService {
@@ -60,6 +61,7 @@ export class AdminBookingQueryService {
         'booking.totalAmountCents',
         'booking.currency',
         'booking.holdExpiresAt',
+        'booking.paymentExpiresAt',
         'booking.createdAt',
       ]);
 
@@ -179,10 +181,10 @@ export class AdminBookingQueryService {
       seats,
       totalAmountCents: booking.totalAmountCents,
       currency: booking.currency,
-      holdExpiresAt: formatUtcDateTime(booking.holdExpiresAt),
       needsReviewReason: booking.needsReviewReason,
       createdAt: formatUtcDateTime(booking.createdAt),
       updatedAt: formatUtcDateTime(booking.updatedAt),
+      ...mapReservationTiming(booking),
     };
   }
 
@@ -232,8 +234,8 @@ export class AdminBookingQueryService {
       status: booking.status,
       totalAmountCents: booking.totalAmountCents,
       currency: booking.currency,
-      holdExpiresAt: formatUtcDateTime(booking.holdExpiresAt),
       createdAt: formatUtcDateTime(booking.createdAt),
+      ...mapReservationTiming(booking),
     };
   }
 }
