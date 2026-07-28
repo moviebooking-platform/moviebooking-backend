@@ -9,12 +9,17 @@ import {
   Logger,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { encryptId, formatUtcDateTime } from '@moviebooking/common';
+import { encryptId } from '@moviebooking/common';
+import { Booking } from '@moviebooking/database';
 import { HoldService } from './hold.service';
+import { mapReservationTiming } from './reservation-timing.mapper';
 import { BookingQueryService } from './booking-query.service';
 import { BookingCancelService } from './booking-cancel.service';
 import { HoldSeatsDto } from './dto/hold-seats.dto';
-import { BookingResponse, BookingSeatResponse } from './dto/booking-response.dto';
+import {
+  BookingResponse,
+  BookingSeatResponse,
+} from './dto/booking-response.dto';
 
 /** Public booking endpoints for guests (no authentication required). */
 @ApiTags('Bookings')
@@ -41,14 +46,17 @@ export class BookingsController {
   })
   @ApiResponse({
     status: 422,
-    description: 'Business rule violation (seats unavailable, show inactive, etc.)',
+    description:
+      'Business rule violation (seats unavailable, show inactive, etc.)',
   })
   @ApiResponse({
     status: 503,
     description: 'Service unavailable (Show/Theatre service down)',
   })
   async holdSeats(@Body() dto: HoldSeatsDto): Promise<BookingResponse> {
-    this.logger.log(`Hold request for show ${dto.showId}, ${dto.seatIds.length} seats`);
+    this.logger.log(
+      `Hold request for show ${dto.showId}, ${dto.seatIds.length} seats`,
+    );
 
     const booking = await this.holdService.holdSeats(dto);
 
@@ -66,10 +74,13 @@ export class BookingsController {
     status: 404,
     description: 'Booking not found',
   })
-  async getBooking(@Param('bookingRef') bookingRef: string): Promise<BookingResponse> {
+  async getBooking(
+    @Param('bookingRef') bookingRef: string,
+  ): Promise<BookingResponse> {
     this.logger.log(`Fetching booking: ${bookingRef}`);
 
-    const booking = await this.bookingQueryService.getByReferenceOrFail(bookingRef);
+    const booking =
+      await this.bookingQueryService.getByReferenceOrFail(bookingRef);
 
     return this.mapBookingResponse(booking);
   }
@@ -88,30 +99,27 @@ export class BookingsController {
   })
   @ApiResponse({
     status: 422,
-    description: 'Business rule violation (cannot cancel confirmed/expired booking)',
+    description:
+      'Business rule violation (cannot cancel confirmed/expired booking)',
   })
-  async cancelBooking(@Param('bookingRef') bookingRef: string): Promise<BookingResponse> {
+  async cancelBooking(
+    @Param('bookingRef') bookingRef: string,
+  ): Promise<BookingResponse> {
     this.logger.log(`Cancel request for booking: ${bookingRef}`);
 
-    const booking = await this.bookingQueryService.getByReferenceOrFail(bookingRef);
-    const cancelledBooking = await this.bookingCancelService.cancelBooking(booking);
+    const booking =
+      await this.bookingQueryService.getByReferenceOrFail(bookingRef);
+    const cancelledBooking =
+      await this.bookingCancelService.cancelBooking(booking);
 
     return this.mapBookingResponse(cancelledBooking);
   }
 
-  /** Maps booking entity to API response with encrypted IDs and calculated remaining time. */
-  private mapBookingResponse(booking: any): BookingResponse {
-    const now = new Date();
-    const expiresAt = booking.holdExpiresAt ? new Date(booking.holdExpiresAt) : null;
-    
-    const remainingSeconds =
-      expiresAt && expiresAt > now
-        ? Math.max(0, Math.floor((expiresAt.getTime() - now.getTime()) / 1000))
-        : 0;
-
-    const seats: BookingSeatResponse[] = booking.seats.map((seat: any) => ({
+  /** Maps booking entity to API response while keeping public IDs encrypted. */
+  private mapBookingResponse(booking: Booking): BookingResponse {
+    const seats: BookingSeatResponse[] = booking.seats.map((seat) => ({
       seatId: encryptId(seat.seatId),
-      seatCode: seat.seatCode || `${seat.seatType}-${seat.seatId}`, // Fallback if seatCode not available
+      seatCode: `${seat.seatType}-${seat.seatId}`,
       seatType: seat.seatType,
       priceCents: seat.priceCents,
     }));
@@ -123,8 +131,7 @@ export class BookingsController {
       seats,
       totalAmountCents: booking.totalAmountCents,
       currency: booking.currency,
-      holdExpiresAt: expiresAt ? formatUtcDateTime(expiresAt) : null,
-      remainingSeconds,
+      ...mapReservationTiming(booking),
     };
   }
 }

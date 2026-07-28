@@ -40,7 +40,7 @@ interface ValidatedHoldData {
 
 /**
  * Handles seat hold creation with four-phase flow:
- * Phase 1: Pre-transaction validation 
+ * Phase 1: Pre-transaction validation
  * Phase 2: Redis lock acquisition
  * Phase 3: Database transaction
  * Phase 4: Lock release
@@ -160,8 +160,9 @@ export class HoldService {
       }
 
       // Generate unique booking reference
-      const bookingRef =
-        await this.bookingRefGenerator.generateUniqueRef(queryRunner.manager);
+      const bookingRef = await this.bookingRefGenerator.generateUniqueRef(
+        queryRunner.manager,
+      );
 
       // Insert booking
       const booking = queryRunner.manager.create(Booking, {
@@ -172,6 +173,7 @@ export class HoldService {
         totalAmountCents: data.totalAmountCents,
         currency: data.currency,
         holdExpiresAt: data.holdExpiresAt,
+        paymentExpiresAt: null,
       });
       await queryRunner.manager.save(booking);
 
@@ -254,7 +256,9 @@ export class HoldService {
 
     try {
       for (const seatId of sortedSeatIds) {
-        this.logger.debug(`Acquiring lock for seat ${seatId} in show ${showId}`);
+        this.logger.debug(
+          `Acquiring lock for seat ${seatId} in show ${showId}`,
+        );
         const token = await this.seatLockService.acquire(showId, seatId);
         acquiredTokens.push(token);
       }
@@ -329,7 +333,10 @@ export class HoldService {
       throwError('NOT_FOUND', 'Show not found');
     }
     if (show.status !== ShowStatus.ACTIVE) {
-      throwError('BUSINESS_RULE_VIOLATION', 'Show is not available for booking');
+      throwError(
+        'BUSINESS_RULE_VIOLATION',
+        'Show is not available for booking',
+      );
     }
 
     // Step 3: Get screen seats and validate seat membership
@@ -365,7 +372,10 @@ export class HoldService {
     // Step 4: Get prices and validate every seat type has a price
     const prices = await this.showClient.getPrices(showId);
     if (!prices || prices.length === 0) {
-      throwError('SERVICE_UNAVAILABLE', 'Unable to retrieve pricing information');
+      throwError(
+        'SERVICE_UNAVAILABLE',
+        'Unable to retrieve pricing information',
+      );
     }
 
     const priceMap = new Map(prices.map((p) => [p.seatType, p.amount]));
