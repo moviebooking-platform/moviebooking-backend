@@ -10,6 +10,9 @@ import { HoldService } from './hold.service';
 import { BookingQueryService } from './booking-query.service';
 import { BookingCancelService } from './booking-cancel.service';
 import { BookingRefGenerator } from './booking-ref.generator';
+import { TheatreBookingScopeService } from './theatre-booking-scope.service';
+import { AdminBookingsController } from './admin-bookings.controller';
+import { AdminBookingQueryService } from './admin-booking-query.service';
 
 @Module({
   imports: [
@@ -19,13 +22,20 @@ import { BookingRefGenerator } from './booking-ref.generator';
     RedisModule, // Provides SeatLockService
     MessagingModule, // Provides BookingEventsPublisher
   ],
-  controllers: [BookingsController],
+  controllers: [BookingsController, AdminBookingsController],
   providers: [
     HoldService,
     BookingQueryService,
     BookingCancelService,
     BookingRefGenerator,
+    TheatreBookingScopeService,
+    AdminBookingQueryService,
   ],
-  exports: [HoldService, BookingQueryService, BookingCancelService],
+  exports: [
+    HoldService,
+    BookingQueryService,
+    BookingCancelService,
+    TheatreBookingScopeService,
+  ],
 })
 export class BookingsModule {}

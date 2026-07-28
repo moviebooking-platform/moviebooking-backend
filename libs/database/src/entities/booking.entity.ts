@@ -12,6 +12,7 @@ import { SeatHold } from './seat-hold.entity';
 @Index('idx_bookings_show', ['showId'])
 @Index('idx_bookings_status', ['status'])
 @Index('idx_bookings_hold_expires', ['status', 'holdExpiresAt'])
+@Index('idx_bookings_payment_expires', ['status', 'paymentExpiresAt'])
 @Index('idx_bookings_email', ['email'])
 @Index('idx_bookings_created', ['createdAt'])
 export class Booking extends BaseEntity {
@@ -29,6 +30,9 @@ export class Booking extends BaseEntity {
 
   @Column({ name: 'hold_expires_at', type: 'datetime2', nullable: true })
   holdExpiresAt: Date | null;
+
+  @Column({ name: 'payment_expires_at', type: 'datetime2', nullable: true })
+  paymentExpiresAt: Date | null;
 
   @Column({ name: 'total_amount_cents', type: 'int' })
   totalAmountCents: number;
