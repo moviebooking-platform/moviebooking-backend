@@ -1,7 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { BookingStatus } from '@moviebooking/database';
+import { ReservationTimingResponseDto } from './reservation-timing-response.dto';
 
-export class AdminBookingSummaryResponseDto {
+export class AdminBookingSummaryResponseDto extends ReservationTimingResponseDto {
   @ApiProperty({ description: 'Encrypted booking ID' })
   id: string;
 
@@ -22,9 +23,6 @@ export class AdminBookingSummaryResponseDto {
 
   @ApiProperty()
   currency: string;
-
-  @ApiProperty({ nullable: true, type: String, format: 'date-time' })
-  holdExpiresAt: string | null;
 
   @ApiProperty({ type: String, format: 'date-time' })
   createdAt: string;

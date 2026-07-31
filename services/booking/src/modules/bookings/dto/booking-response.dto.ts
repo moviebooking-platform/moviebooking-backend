@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { BookingStatus } from '@moviebooking/database';
+import { ReservationTimingResponseDto } from './reservation-timing-response.dto';
 
 export class BookingSeatResponse {
   @ApiProperty({ description: 'Encrypted seat ID' })
@@ -15,7 +16,7 @@ export class BookingSeatResponse {
   priceCents: number;
 }
 
-export class BookingResponse {
+export class BookingResponse extends ReservationTimingResponseDto {
   @ApiProperty({ description: 'Unique booking reference' })
   bookingRef: string;
 
@@ -33,13 +34,4 @@ export class BookingResponse {
 
   @ApiProperty({ description: 'Currency code', example: 'GBP' })
   currency: string;
-
-  @ApiProperty({
-    description: 'Hold expiration timestamp (ISO 8601)',
-    nullable: true,
-  })
-  holdExpiresAt: string | null;
-
-  @ApiProperty({ description: 'Seconds remaining until hold expires' })
-  remainingSeconds: number;
 }

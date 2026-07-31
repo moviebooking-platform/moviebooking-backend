@@ -64,9 +64,7 @@ export class BookingCancelService {
 
       await queryRunner.commitTransaction();
 
-      this.logger.log(
-        `Booking cancelled successfully: ${booking.bookingRef}`,
-      );
+      this.logger.log(`Booking cancelled successfully: ${booking.bookingRef}`);
 
       // Publish event (fire-and-forget)
       this.eventsPublisher
