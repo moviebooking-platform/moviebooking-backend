@@ -99,8 +99,11 @@ export class AdminBookingQueryService {
 
     const [bookings, total] = await qb.getManyAndCount();
 
+    // One timestamp for the whole page so countdowns stay consistent across rows
+    const responseNow = new Date();
+
     return new PaginatedResponse(
-      bookings.map((booking) => this.mapSummary(booking)),
+      bookings.map((booking) => this.mapSummary(booking, responseNow)),
       total,
       page,
       pageSize,
@@ -225,7 +228,10 @@ export class AdminBookingQueryService {
     return decryptedShowId;
   }
 
-  private mapSummary(booking: Booking): AdminBookingSummaryResponseDto {
+  private mapSummary(
+    booking: Booking,
+    now: Date,
+  ): AdminBookingSummaryResponseDto {
     return {
       id: encryptId(booking.id),
       bookingRef: booking.bookingRef,
@@ -235,7 +241,7 @@ export class AdminBookingQueryService {
       totalAmountCents: booking.totalAmountCents,
       currency: booking.currency,
       createdAt: formatUtcDateTime(booking.createdAt),
-      ...mapReservationTiming(booking),
+      ...mapReservationTiming(booking, now),
     };
   }
 }
