@@ -20,6 +20,7 @@ import { CreateSeatDto } from './dto/create-seat.dto';
 import { UpdateSeatDto } from './dto/update-seat.dto';
 import { ListSeatsQueryDto } from './dto/list-seats-query.dto';
 import { BulkCreateSeatsDto } from './dto/bulk-create-seats.dto';
+import { BulkUpdateSeatsDto } from './dto/bulk-update-seats.dto';
 import {
   JwtAuthGuard,
   OptionalJwtAuthGuard,
@@ -42,8 +43,16 @@ export class SeatsController {
   @Roles(ROLES.SUPER_ADMIN, ROLES.THEATRE_ADMIN)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Create seat', description: 'Create a single seat' })
-  @ApiParam({ name: 'theatreId', type: String, description: 'Encrypted Theatre ID' })
-  @ApiParam({ name: 'screenId', type: String, description: 'Encrypted Screen ID' })
+  @ApiParam({
+    name: 'theatreId',
+    type: String,
+    description: 'Encrypted Theatre ID',
+  })
+  @ApiParam({
+    name: 'screenId',
+    type: String,
+    description: 'Encrypted Screen ID',
+  })
   @ApiResponse({ status: 201, description: 'Seat created' })
   @ApiResponse({ status: 409, description: 'Seat already exists' })
   async create(
@@ -58,9 +67,20 @@ export class SeatsController {
   @UseGuards(JwtAuthGuard, RolesGuard, TheatreOwnershipGuard)
   @Roles(ROLES.SUPER_ADMIN, ROLES.THEATRE_ADMIN)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Bulk create seats', description: 'Create multiple seats in a row' })
-  @ApiParam({ name: 'theatreId', type: String, description: 'Encrypted Theatre ID' })
-  @ApiParam({ name: 'screenId', type: String, description: 'Encrypted Screen ID' })
+  @ApiOperation({
+    summary: 'Bulk create seats',
+    description: 'Create multiple seats in a row',
+  })
+  @ApiParam({
+    name: 'theatreId',
+    type: String,
+    description: 'Encrypted Theatre ID',
+  })
+  @ApiParam({
+    name: 'screenId',
+    type: String,
+    description: 'Encrypted Screen ID',
+  })
   @ApiResponse({ status: 201, description: 'Seats created' })
   @ApiResponse({ status: 409, description: 'One or more seats already exist' })
   async bulkCreate(
@@ -71,13 +91,23 @@ export class SeatsController {
     return this.seatsService.bulkCreate(theatreId, screenId, dto);
   }
 
-
   @Get()
   @UseGuards(OptionalJwtAuthGuard)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'List seats', description: 'List seats for a screen. Guest: ACTIVE only.' })
-  @ApiParam({ name: 'theatreId', type: String, description: 'Encrypted Theatre ID' })
-  @ApiParam({ name: 'screenId', type: String, description: 'Encrypted Screen ID' })
+  @ApiOperation({
+    summary: 'List seats',
+    description: 'List seats for a screen. Guest: ACTIVE only.',
+  })
+  @ApiParam({
+    name: 'theatreId',
+    type: String,
+    description: 'Encrypted Theatre ID',
+  })
+  @ApiParam({
+    name: 'screenId',
+    type: String,
+    description: 'Encrypted Screen ID',
+  })
   @ApiResponse({ status: 200, description: 'Seats retrieved' })
   async findAll(
     @DecryptId('theatreId') theatreId: number,
@@ -91,9 +121,20 @@ export class SeatsController {
   @Get(':id')
   @UseGuards(OptionalJwtAuthGuard)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Get seat detail', description: 'Get seat details. Guest: ACTIVE only.' })
-  @ApiParam({ name: 'theatreId', type: String, description: 'Encrypted Theatre ID' })
-  @ApiParam({ name: 'screenId', type: String, description: 'Encrypted Screen ID' })
+  @ApiOperation({
+    summary: 'Get seat detail',
+    description: 'Get seat details. Guest: ACTIVE only.',
+  })
+  @ApiParam({
+    name: 'theatreId',
+    type: String,
+    description: 'Encrypted Theatre ID',
+  })
+  @ApiParam({
+    name: 'screenId',
+    type: String,
+    description: 'Encrypted Screen ID',
+  })
   @ApiParam({ name: 'id', type: String, description: 'Encrypted Seat ID' })
   @ApiResponse({ status: 200, description: 'Seat retrieved' })
   @ApiResponse({ status: 404, description: 'Seat not found' })
@@ -111,8 +152,16 @@ export class SeatsController {
   @Roles(ROLES.SUPER_ADMIN, ROLES.THEATRE_ADMIN)
   @ApiBearerAuth('JWT-auth')
   @ApiOperation({ summary: 'Update seat', description: 'Update seat details' })
-  @ApiParam({ name: 'theatreId', type: String, description: 'Encrypted Theatre ID' })
-  @ApiParam({ name: 'screenId', type: String, description: 'Encrypted Screen ID' })
+  @ApiParam({
+    name: 'theatreId',
+    type: String,
+    description: 'Encrypted Theatre ID',
+  })
+  @ApiParam({
+    name: 'screenId',
+    type: String,
+    description: 'Encrypted Screen ID',
+  })
   @ApiParam({ name: 'id', type: String, description: 'Encrypted Seat ID' })
   @ApiResponse({ status: 200, description: 'Seat updated' })
   @ApiResponse({ status: 404, description: 'Seat not found' })
@@ -130,9 +179,20 @@ export class SeatsController {
   @UseGuards(JwtAuthGuard, RolesGuard, TheatreOwnershipGuard)
   @Roles(ROLES.SUPER_ADMIN, ROLES.THEATRE_ADMIN)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Delete seat', description: 'Soft-delete by setting INACTIVE' })
-  @ApiParam({ name: 'theatreId', type: String, description: 'Encrypted Theatre ID' })
-  @ApiParam({ name: 'screenId', type: String, description: 'Encrypted Screen ID' })
+  @ApiOperation({
+    summary: 'Delete seat',
+    description: 'Soft-delete by setting INACTIVE',
+  })
+  @ApiParam({
+    name: 'theatreId',
+    type: String,
+    description: 'Encrypted Theatre ID',
+  })
+  @ApiParam({
+    name: 'screenId',
+    type: String,
+    description: 'Encrypted Screen ID',
+  })
   @ApiParam({ name: 'id', type: String, description: 'Encrypted Seat ID' })
   @ApiResponse({ status: 200, description: 'Seat deleted' })
   @ApiResponse({ status: 404, description: 'Seat not found' })
@@ -142,5 +202,34 @@ export class SeatsController {
     @DecryptId('id') id: number,
   ) {
     return this.seatsService.remove(theatreId, screenId, id);
+  }
+
+  @Patch('bulk-update')
+  @UseGuards(JwtAuthGuard, RolesGuard, TheatreOwnershipGuard)
+  @Roles(ROLES.SUPER_ADMIN, ROLES.THEATRE_ADMIN)
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({
+    summary: 'Bulk update seats',
+    description: 'Update seat types for multiple seats',
+  })
+  @ApiParam({
+    name: 'theatreId',
+    type: String,
+    description: 'Encrypted Theatre ID',
+  })
+  @ApiParam({
+    name: 'screenId',
+    type: String,
+    description: 'Encrypted Screen ID',
+  })
+  @ApiResponse({ status: 200, description: 'Seats updated' })
+  @ApiResponse({ status: 404, description: 'One or more seats not found' })
+  async bulkUpdate(
+    @DecryptId('theatreId') theatreId: number,
+    @DecryptId('screenId') screenId: number,
+    @Body() dto: BulkUpdateSeatsDto,
+    @CurrentUser() user?: ICurrentUser,
+  ) {
+    return this.seatsService.bulkUpdate(theatreId, screenId, dto, user);
   }
 }

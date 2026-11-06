@@ -23,7 +23,9 @@ export class InternalService {
     private readonly seatRepository: Repository<Seat>,
   ) {}
 
-  async getTheatreIdByUserId(userId: number): Promise<{ theatreId: number | null }> {
+  async getTheatreIdByUserId(
+    userId: number,
+  ): Promise<{ theatreId: number | null }> {
     const assignment = await this.theatreAdminRepository.findOne({
       where: { userId, status: TheatreAdminStatus.ACTIVE },
     });
@@ -41,7 +43,9 @@ export class InternalService {
   /** Fetches multiple theatres in a single query for batch enrichment. */
   async getTheatresByIds(ids: number[]) {
     if (!ids.length) return [];
-    const theatres = await this.theatreRepository.find({ where: { id: In(ids) } });
+    const theatres = await this.theatreRepository.find({
+      where: { id: In(ids) },
+    });
     return theatres.map((t) => this.mapTheatre(t));
   }
 
@@ -55,7 +59,9 @@ export class InternalService {
   /** Fetches multiple screens in a single query for batch enrichment. */
   async getScreensByIds(ids: number[]) {
     if (!ids.length) return [];
-    const screens = await this.screenRepository.find({ where: { id: In(ids) } });
+    const screens = await this.screenRepository.find({
+      where: { id: In(ids) },
+    });
     return screens.map((s) => this.mapScreen(s));
   }
 

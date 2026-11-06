@@ -3,7 +3,11 @@ import { ApiProperty } from '@nestjs/swagger';
 import { SeatType } from '@moviebooking/database';
 
 export class BulkCreateSeatsDto {
-  @ApiProperty({ example: 'A', description: 'Row label for all seats', maxLength: 10 })
+  @ApiProperty({
+    example: 'A',
+    description: 'Row label for all seats',
+    maxLength: 10,
+  })
   @IsString()
   @MaxLength(10)
   rowLabel: string;
@@ -13,7 +17,11 @@ export class BulkCreateSeatsDto {
   @Min(1)
   startNumber: number;
 
-  @ApiProperty({ example: 20, description: 'Ending seat number (inclusive)', minimum: 1 })
+  @ApiProperty({
+    example: 20,
+    description: 'Ending seat number (inclusive)',
+    minimum: 1,
+  })
   @IsInt()
   @Min(1)
   endNumber: number;

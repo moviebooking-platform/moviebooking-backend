@@ -1,6 +1,24 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { JwtAuthGuard, OptionalJwtAuthGuard, RolesGuard, Roles, CurrentUser, ICurrentUser, decryptId } from '@moviebooking/common';
+import {
+  JwtAuthGuard,
+  OptionalJwtAuthGuard,
+  RolesGuard,
+  Roles,
+  CurrentUser,
+  ICurrentUser,
+  decryptId,
+} from '@moviebooking/common';
 import { ShowsService } from './shows.service';
 import { CreateShowDto } from './dto/create-show.dto';
 import { UpdateShowDto } from './dto/update-show.dto';
@@ -15,7 +33,10 @@ export class ShowsController {
   @Get()
   @UseGuards(OptionalJwtAuthGuard)
   @ApiOperation({ summary: 'List shows with filters (Guest/Admin)' })
-  async findAll(@Query() query: ListShowsQueryDto, @CurrentUser() user?: ICurrentUser) {
+  async findAll(
+    @Query() query: ListShowsQueryDto,
+    @CurrentUser() user?: ICurrentUser,
+  ) {
     return this.showsService.findAll(query, user);
   }
 

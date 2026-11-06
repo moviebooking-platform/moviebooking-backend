@@ -1,4 +1,11 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { SkipTransform } from '@moviebooking/common';
 import { InternalService } from './internal.service';
@@ -16,7 +23,8 @@ export class InternalController {
   @Get('theatre-admins/by-user/:userId')
   @ApiOperation({
     summary: 'Get theatre assignment by user ID',
-    description: 'Internal endpoint for Identity Service to fetch theatreId during login',
+    description:
+      'Internal endpoint for Identity Service to fetch theatreId during login',
   })
   @ApiParam({ name: 'userId', type: Number })
   @ApiResponse({ status: 200, description: 'Returns theatreId or null' })
@@ -27,7 +35,8 @@ export class InternalController {
   @Get('theatres/:id')
   @ApiOperation({
     summary: 'Get theatre by ID',
-    description: 'Internal endpoint for other services to fetch theatre details',
+    description:
+      'Internal endpoint for other services to fetch theatre details',
   })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({ status: 200, description: 'Returns theatre details or null' })
@@ -47,7 +56,8 @@ export class InternalController {
   @Get('screens/:id')
   @ApiOperation({
     summary: 'Get screen by ID',
-    description: 'Internal endpoint for Show Service to fetch screen details and verify ownership',
+    description:
+      'Internal endpoint for Show Service to fetch screen details and verify ownership',
   })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({ status: 200, description: 'Returns screen details or null' })
@@ -67,7 +77,8 @@ export class InternalController {
   @Get('screens/:id/seats')
   @ApiOperation({
     summary: 'Get seats by screen ID',
-    description: 'Internal endpoint for Show/Booking Service to fetch all active seats for a screen',
+    description:
+      'Internal endpoint for Show/Booking Service to fetch all active seats for a screen',
   })
   @ApiParam({ name: 'id', type: Number })
   @ApiResponse({ status: 200, description: 'Returns array of seats' })

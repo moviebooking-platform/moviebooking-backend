@@ -35,26 +35,42 @@ export class TheatreAdminsController {
   constructor(private readonly theatreAdminsService: TheatreAdminsService) {}
 
   @Post()
-  @ApiOperation({ summary: 'Assign user to theatre', description: 'Create theatre admin assignment (Super Admin only)' })
+  @ApiOperation({
+    summary: 'Assign user to theatre',
+    description: 'Create theatre admin assignment (Super Admin only)',
+  })
   @ApiResponse({ status: 201, description: 'Assignment created' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 409, description: 'Duplicate assignment' })
-  @ApiResponse({ status: 422, description: 'User does not have THEATRE_ADMIN role' })
+  @ApiResponse({
+    status: 422,
+    description: 'User does not have THEATRE_ADMIN role',
+  })
   async create(@Body() dto: CreateTheatreAdminDto) {
     return this.theatreAdminsService.create(dto);
   }
 
   @Get()
-  @ApiOperation({ summary: 'List theatre admin assignments', description: 'Paginated list (Super Admin only)' })
+  @ApiOperation({
+    summary: 'List theatre admin assignments',
+    description: 'Paginated list (Super Admin only)',
+  })
   @ApiResponse({ status: 200, description: 'Assignments retrieved' })
   async findAll(@Query() query: ListTheatreAdminsQueryDto) {
     return this.theatreAdminsService.findAll(query);
   }
 
   @Patch(':id/status')
-  @ApiOperation({ summary: 'Update assignment status', description: 'Set ACTIVE or DISABLED (Super Admin only)' })
-  @ApiParam({ name: 'id', type: String, description: 'Encrypted Assignment ID' })
+  @ApiOperation({
+    summary: 'Update assignment status',
+    description: 'Set ACTIVE or DISABLED (Super Admin only)',
+  })
+  @ApiParam({
+    name: 'id',
+    type: String,
+    description: 'Encrypted Assignment ID',
+  })
   @ApiResponse({ status: 200, description: 'Assignment updated' })
   @ApiResponse({ status: 404, description: 'Assignment not found' })
   async updateStatus(

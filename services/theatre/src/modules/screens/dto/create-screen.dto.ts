@@ -7,4 +7,4 @@ export class CreateScreenDto {
   @MinLength(1)
   @MaxLength(100)
   name: string;
-} 
+}

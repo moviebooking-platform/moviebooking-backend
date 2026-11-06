@@ -26,10 +26,23 @@ export class Movie extends BaseEntity {
   @Column({ type: 'int', name: 'running_time_minutes', nullable: true })
   runningTimeMinutes: number | null;
 
-  @Column({ type: 'decimal', precision: 3, scale: 1, name: 'rating_value', nullable: true })
+  @Column({
+    type: 'decimal',
+    precision: 3,
+    scale: 1,
+    name: 'rating_value',
+    nullable: true,
+  })
   ratingValue: number | null;
 
-  @Column({ type: 'decimal', precision: 3, scale: 1, name: 'rating_max', nullable: true, default: 10 })
+  @Column({
+    type: 'decimal',
+    precision: 3,
+    scale: 1,
+    name: 'rating_max',
+    nullable: true,
+    default: 10,
+  })
   ratingMax: number | null;
 
   @Column({ type: 'varchar', length: 20, default: MovieStatus.ACTIVE })

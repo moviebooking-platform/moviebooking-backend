@@ -50,7 +50,7 @@ async function bootstrap() {
     new TransformInterceptor(app.get(Reflector)),
   );
 
-  // Swagger documentation 
+  // Swagger documentation
   if (configService.get('NODE_ENV') !== 'production') {
     const { DocumentBuilder, SwaggerModule } = await import('@nestjs/swagger');
     const config = new DocumentBuilder()

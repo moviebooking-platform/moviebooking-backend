@@ -6,7 +6,9 @@ import { SeatAvailabilityService } from './seat-availability.service';
 @ApiTags('Seat Availability')
 @Controller('shows/:showId/seats')
 export class SeatAvailabilityController {
-  constructor(private readonly seatAvailabilityService: SeatAvailabilityService) {}
+  constructor(
+    private readonly seatAvailabilityService: SeatAvailabilityService,
+  ) {}
 
   @Get()
   @UseGuards(OptionalJwtAuthGuard)

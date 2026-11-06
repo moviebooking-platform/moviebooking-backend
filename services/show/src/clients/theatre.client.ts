@@ -42,13 +42,17 @@ export class TheatreClient extends BaseServiceClient {
   /** Fetches multiple screens in a single call. Returns empty array on failure. */
   async getScreensByIds(screenIds: number[]): Promise<ScreenDto[]> {
     if (!screenIds.length) return [];
-    const result = await this.post<ScreenDto[]>('/api/internal/screens/batch', { screenIds });
+    const result = await this.post<ScreenDto[]>('/api/internal/screens/batch', {
+      screenIds,
+    });
     return result ?? [];
   }
 
   /** Fetches all active seats for a screen. */
   async getScreenSeats(screenId: number): Promise<SeatDto[]> {
-    const result = await this.get<SeatDto[]>(`/api/internal/screens/${screenId}/seats`);
+    const result = await this.get<SeatDto[]>(
+      `/api/internal/screens/${screenId}/seats`,
+    );
     return result ?? [];
   }
 
@@ -60,12 +64,18 @@ export class TheatreClient extends BaseServiceClient {
   /** Fetches multiple theatres in a single call. Returns empty array on failure. */
   async getTheatresByIds(theatreIds: number[]): Promise<TheatreDto[]> {
     if (!theatreIds.length) return [];
-    const result = await this.post<TheatreDto[]>('/api/internal/theatres/batch', { theatreIds });
+    const result = await this.post<TheatreDto[]>(
+      '/api/internal/theatres/batch',
+      { theatreIds },
+    );
     return result ?? [];
   }
 
   /** Verifies a screen belongs to a theatre. */
-  async verifyScreenOwnership(screenId: number, theatreId: number): Promise<boolean> {
+  async verifyScreenOwnership(
+    screenId: number,
+    theatreId: number,
+  ): Promise<boolean> {
     const screen = await this.getScreen(screenId);
     return screen?.theatreId === theatreId;
   }

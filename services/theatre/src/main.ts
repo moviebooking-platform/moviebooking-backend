@@ -22,7 +22,9 @@ async function bootstrap() {
   // Swagger configuration
   const config = new DocumentBuilder()
     .setTitle('Theatre Service API')
-    .setDescription('Theatre, screen, and seat management API for Movie Ticket Booking System')
+    .setDescription(
+      'Theatre, screen, and seat management API for Movie Ticket Booking System',
+    )
     .setVersion('1.0')
     .addBearerAuth(
       {

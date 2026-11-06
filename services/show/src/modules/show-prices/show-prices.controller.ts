@@ -1,6 +1,14 @@
 import { Controller, Get, Put, Param, Body, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { JwtAuthGuard, OptionalJwtAuthGuard, RolesGuard, Roles, CurrentUser, ICurrentUser, decryptId } from '@moviebooking/common';
+import {
+  JwtAuthGuard,
+  OptionalJwtAuthGuard,
+  RolesGuard,
+  Roles,
+  CurrentUser,
+  ICurrentUser,
+  decryptId,
+} from '@moviebooking/common';
 import { ShowPricesService } from './show-prices.service';
 import { SetPricesDto } from './dto/set-prices.dto';
 import { ShowOwnershipGuard } from '../shows/guards/show-ownership.guard';

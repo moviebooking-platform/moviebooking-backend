@@ -24,7 +24,9 @@ export class M3TheatreService1704326400000 implements MigrationInterface {
     `);
 
     await queryRunner.query(`CREATE INDEX idx_theatres_city ON theatres(city)`);
-    await queryRunner.query(`CREATE INDEX idx_theatres_status ON theatres(status)`);
+    await queryRunner.query(
+      `CREATE INDEX idx_theatres_status ON theatres(status)`,
+    );
     await queryRunner.query(`CREATE INDEX idx_theatres_name ON theatres(name)`);
 
     // Theatre Admins table
@@ -44,8 +46,12 @@ export class M3TheatreService1704326400000 implements MigrationInterface {
       )
     `);
 
-    await queryRunner.query(`CREATE INDEX idx_theatre_admins_theatre ON theatre_admins(theatre_id)`);
-    await queryRunner.query(`CREATE INDEX idx_theatre_admins_status ON theatre_admins(status)`);
+    await queryRunner.query(
+      `CREATE INDEX idx_theatre_admins_theatre ON theatre_admins(theatre_id)`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX idx_theatre_admins_status ON theatre_admins(status)`,
+    );
 
     // Screens table
     await queryRunner.query(`
@@ -62,8 +68,12 @@ export class M3TheatreService1704326400000 implements MigrationInterface {
       )
     `);
 
-    await queryRunner.query(`CREATE INDEX idx_screens_theatre ON screens(theatre_id)`);
-    await queryRunner.query(`CREATE INDEX idx_screens_status ON screens(status)`);
+    await queryRunner.query(
+      `CREATE INDEX idx_screens_theatre ON screens(theatre_id)`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX idx_screens_status ON screens(status)`,
+    );
 
     // Seats table
     await queryRunner.query(`
@@ -83,8 +93,12 @@ export class M3TheatreService1704326400000 implements MigrationInterface {
       )
     `);
 
-    await queryRunner.query(`CREATE INDEX idx_seats_screen ON seats(screen_id)`);
-    await queryRunner.query(`CREATE INDEX idx_seats_screen_type ON seats(screen_id, seat_type)`);
+    await queryRunner.query(
+      `CREATE INDEX idx_seats_screen ON seats(screen_id)`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX idx_seats_screen_type ON seats(screen_id, seat_type)`,
+    );
     await queryRunner.query(`CREATE INDEX idx_seats_status ON seats(status)`);
   }
 
