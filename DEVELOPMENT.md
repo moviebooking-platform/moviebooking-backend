@@ -48,6 +48,7 @@ Each service reads only its own port variable:
 
 ```bash
 npm run lint:check   # ESLint without --fix (npm run lint applies fixes)
+npm run typecheck    # tsc --noEmit in every package
 npm test             # unit tests in every package
 npm run test:cov     # unit tests with coverage
 ```
