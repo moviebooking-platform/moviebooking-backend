@@ -195,6 +195,11 @@ describe('HoldService', () => {
     expect(dataSource.transaction).toHaveBeenCalledTimes(1);
     // booking, booking_seats batch, seat_holds batch
     expect(manager.save).toHaveBeenCalledTimes(3);
+    const bookingSeats = manager.save.mock.calls[1][0];
+    expect(bookingSeats.map((s: any) => [s.seatCode, s.priceCents])).toEqual([
+      ['A1', 1000],
+      ['A2', 1500],
+    ]);
     expect(seatLockService.acquire.mock.calls.map((c) => c[1])).toEqual([10, 11]);
     expect(seatLockService.release).toHaveBeenCalledTimes(2);
   });

@@ -147,6 +147,7 @@ export class HoldService {
               bookingId: booking.id,
               showId: data.showId,
               seatId: seat.seatId,
+              seatCode: seat.seatCode,
               seatType: seat.seatType,
               priceCents: seat.priceCents,
             }),

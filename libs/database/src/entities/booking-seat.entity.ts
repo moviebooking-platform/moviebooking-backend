@@ -27,6 +27,10 @@ export class BookingSeat extends BaseEntity {
   @Column({ name: 'seat_id', type: 'int' })
   seatId: number;
 
+  /** Seat code snapshot (e.g. "A12") taken at hold time, like the price. */
+  @Column({ name: 'seat_code', type: 'varchar', length: 10 })
+  seatCode: string;
+
   @Column({ name: 'seat_type', type: 'varchar', length: 20 })
   seatType: SeatType;
 

@@ -128,6 +128,78 @@ describe('InternalTransitionsService', () => {
   });
 
   describe('confirmBooking', () => {
+    const seats = [
+      { bookingId: 7, seatId: 10, seatCode: 'A1', seatType: 'STANDARD', priceCents: 1000 },
+      { bookingId: 7, seatId: 11, seatCode: 'A2', seatType: 'VIP', priceCents: 1500 },
+    ];
+
+    function pendingBooking() {
+      return makeBooking({
+        status: BookingStatus.PAYMENT_PENDING,
+        paymentExpiresAt: new Date(Date.now() + 5 * MINUTE),
+        seats,
+      });
+    }
+
+    it('confirms, releases holds and publishes booking.confirmed with real seat codes', async () => {
+      const booking = pendingBooking();
+      const manager = fakeManager(booking);
+      const { service, publisher } = buildService(manager);
+
+      const result = await service.confirmBooking(booking.bookingRef);
+
+      expect(result.status).toBe(BookingStatus.CONFIRMED);
+      expect(manager.update).toHaveBeenCalledWith(
+        SeatHold,
+        { bookingId: booking.id, status: SeatHoldStatus.ACTIVE },
+        { status: SeatHoldStatus.RELEASED },
+      );
+      expect(publisher.publishConfirmed).toHaveBeenCalledWith({
+        bookingRef: booking.bookingRef,
+        showId: booking.showId,
+        email: booking.email,
+        seats: [
+          { seatCode: 'A1', seatType: 'STANDARD', priceCents: 1000 },
+          { seatCode: 'A2', seatType: 'VIP', priceCents: 1500 },
+        ],
+        totalAmountCents: booking.totalAmountCents,
+        currency: booking.currency,
+      });
+    });
+
+    it('builds the payload inside the transaction and publishes only after commit', async () => {
+      const order: string[] = [];
+      const manager = fakeManager(pendingBooking());
+      manager.find.mockImplementation(async () => {
+        order.push('seats loaded');
+        return seats;
+      });
+      const { service, publisher } = buildService(manager);
+      const dataSource = (service as any).dataSource;
+      const runInTransaction = dataSource.transaction.getMockImplementation();
+      dataSource.transaction.mockImplementation(async (work: any) => {
+        const result = await runInTransaction(work);
+        order.push('committed');
+        return result;
+      });
+      publisher.publishConfirmed.mockImplementation(async () => {
+        order.push('published');
+      });
+
+      await service.confirmBooking('REF0000001');
+
+      expect(order).toEqual(['seats loaded', 'committed', 'published']);
+    });
+
+    it('still returns the confirmed booking when the broker is down', async () => {
+      const { service, publisher } = buildService(fakeManager(pendingBooking()));
+      publisher.publishConfirmed.mockRejectedValue(new Error('broker down'));
+
+      const result = await service.confirmBooking('REF0000001');
+
+      expect(result.status).toBe(BookingStatus.CONFIRMED);
+    });
+
     it('returns 422 for an EXPIRED booking', async () => {
       const { service, publisher } = buildService(
         fakeManager(makeBooking({ status: BookingStatus.EXPIRED })),

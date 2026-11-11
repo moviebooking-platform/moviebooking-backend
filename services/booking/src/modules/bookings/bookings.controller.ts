@@ -119,7 +119,7 @@ export class BookingsController {
   private mapBookingResponse(booking: Booking): BookingResponse {
     const seats: BookingSeatResponse[] = booking.seats.map((seat) => ({
       seatId: encryptId(seat.seatId),
-      seatCode: `${seat.seatType}-${seat.seatId}`,
+      seatCode: seat.seatCode,
       seatType: seat.seatType,
       priceCents: seat.priceCents,
     }));

@@ -10,7 +10,10 @@ import {
 } from '../../entities';
 import { throwError } from '@moviebooking/common';
 import { assertTransition } from '../bookings/booking-state';
-import { BookingEventsPublisher } from '../../messaging/booking-events.publisher';
+import {
+  BookingConfirmedEvent,
+  BookingEventsPublisher,
+} from '../../messaging/booking-events.publisher';
 
 /**
  * Handles internal state transitions for Payment Service.
@@ -146,31 +149,46 @@ export class InternalTransitionsService {
           { status: SeatHoldStatus.RELEASED },
         );
 
-        return { response: this.mapTimingResponse(booking), confirmed: booking };
+        // Build the event while the seat rows are read under the same lock, so nothing
+        // that runs after commit can fail before publishing.
+        const seats = await manager.find(BookingSeat, {
+          where: { bookingId: booking.id },
+          order: { seatId: 'ASC' },
+        });
+
+        return {
+          response: this.mapTimingResponse(booking),
+          confirmed: this.buildConfirmedEvent(booking, seats),
+        };
       },
     );
 
     if (confirmed) {
       this.logger.log(`Booking ${bookingRef} confirmed`);
-      await this.eventsPublisher
-        .publishConfirmed({
-          bookingRef: confirmed.bookingRef,
-          showId: confirmed.showId,
-          email: confirmed.email,
-          seats: confirmed.seats.map((s) => ({
-            seatCode: `${s.seatId}`,
-            seatType: s.seatType,
-            priceCents: s.priceCents,
-          })),
-          totalAmountCents: confirmed.totalAmountCents,
-          currency: confirmed.currency,
-        })
-        .catch((err) => {
-          this.logger.error(`Failed to publish booking.confirmed: ${err.message}`);
-        });
+      await this.eventsPublisher.publishConfirmed(confirmed).catch((err) => {
+        this.logger.error(`Failed to publish booking.confirmed: ${err.message}`);
+      });
     }
 
     return response;
+  }
+
+  private buildConfirmedEvent(
+    booking: Booking,
+    seats: BookingSeat[],
+  ): BookingConfirmedEvent {
+    return {
+      bookingRef: booking.bookingRef,
+      showId: booking.showId,
+      email: booking.email,
+      seats: seats.map((s) => ({
+        seatCode: s.seatCode,
+        seatType: s.seatType,
+        priceCents: s.priceCents,
+      })),
+      totalAmountCents: booking.totalAmountCents,
+      currency: booking.currency,
+    };
   }
 
   /**
