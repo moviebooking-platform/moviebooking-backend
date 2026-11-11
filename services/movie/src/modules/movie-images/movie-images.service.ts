@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
-import { Movie, MovieImage, MovieStatus } from '../../entities';
+import { Movie, MovieImage } from '../../entities';
 import { throwError, encryptId } from '@moviebooking/common';
 import { CreateMovieImageDto } from './dto/create-movie-image.dto';
 import { UpdateMovieImageDto } from './dto/update-movie-image.dto';
