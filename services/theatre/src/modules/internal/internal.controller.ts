@@ -11,8 +11,8 @@ import { SkipTransform } from '@moviebooking/common';
 import { InternalService } from './internal.service';
 
 /**
- * Internal API — for service-to-service communication only.
- * No JWT required. In production, restrict via network policies.
+ * Internal API for service-to-service calls.
+ * Not authenticated: anything that can reach this port can call these routes.
  */
 @ApiTags('internal')
 @SkipTransform()

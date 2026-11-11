@@ -103,7 +103,7 @@ export class TheatresService {
       throwError('NOT_FOUND', 'Theatre not found');
     }
 
-    // TODO: Check for future shows once Show Service is built
+    // TODO: refuse while the theatre has future shows (needs a Show Service lookup)
     theatre.status = TheatreStatus.INACTIVE;
     await this.theatreRepository.save(theatre);
 

@@ -8,8 +8,8 @@ import {
 
 /**
  * Development-only endpoints for testing ID encryption.
- * Protected by DevModule conditional import (non-production only)
- * an additional runtime environment: assertNonProduction Method check as defense in depth.
+ * DevModule is only imported outside production; assertNonProduction() also
+ * refuses every request when NODE_ENV is production, as a second safeguard.
  */
 @ApiTags('dev')
 @Controller('dev')

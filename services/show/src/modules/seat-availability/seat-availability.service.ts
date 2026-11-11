@@ -50,7 +50,8 @@ export class SeatAvailabilityService {
       throwError('NOT_FOUND', 'No seats found for this screen');
     }
 
-    // TODO: Fetch bookings/holds from Booking Service (M6)
+    // TODO: this endpoint ignores bookings and holds; the Booking Service owns
+    // real availability (GET /api/shows/:showId/seats/availability on port 3005)
     // For now, all seats are AVAILABLE
     const soldSeatIds = new Set<number>();
     const heldSeatIds = new Set<number>();
