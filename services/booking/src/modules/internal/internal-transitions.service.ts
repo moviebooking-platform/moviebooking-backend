@@ -107,7 +107,8 @@ export class InternalTransitionsService {
 
   /**
    * PAYMENT_PENDING → CONFIRMED after verified payment.
-   * A payment that arrives after the deadline moves the booking to PENDING_REVIEW instead.
+   * A payment that arrives after the deadline moves the booking to PENDING_REVIEW instead
+   * and releases its holds, so the seats become available again.
    * Repeating the call on a CONFIRMED booking returns its current timing.
    * Any other status (including EXPIRED) is rejected with 422.
    */
@@ -133,6 +134,15 @@ export class InternalTransitionsService {
           booking.status = BookingStatus.PENDING_REVIEW;
           booking.needsReviewReason = 'VERIFIED_PAYMENT_AFTER_EXPIRY';
           await manager.save(Booking, booking);
+
+          // The reservation window has passed, so free the seats. Otherwise the
+          // filtered unique index on ACTIVE holds would block them indefinitely,
+          // because the expiry sweep only handles HOLDING and PAYMENT_PENDING.
+          await manager.update(
+            SeatHold,
+            { bookingId: booking.id, status: SeatHoldStatus.ACTIVE },
+            { status: SeatHoldStatus.RELEASED },
+          );
           this.logger.warn(
             `Booking ${bookingRef} paid after expiry, marked PENDING_REVIEW`,
           );

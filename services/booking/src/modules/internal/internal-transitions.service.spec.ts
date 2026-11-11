@@ -191,6 +191,27 @@ describe('InternalTransitionsService', () => {
       expect(order).toEqual(['seats loaded', 'committed', 'published']);
     });
 
+    it('moves a late payment to PENDING_REVIEW, releases its holds and publishes nothing', async () => {
+      const booking = makeBooking({
+        status: BookingStatus.PAYMENT_PENDING,
+        paymentExpiresAt: new Date(Date.now() - 1000),
+        seats,
+      });
+      const manager = fakeManager(booking);
+      const { service, publisher } = buildService(manager);
+
+      const result = await service.confirmBooking(booking.bookingRef);
+
+      expect(result.status).toBe(BookingStatus.PENDING_REVIEW);
+      expect(booking.needsReviewReason).toBe('VERIFIED_PAYMENT_AFTER_EXPIRY');
+      expect(manager.update).toHaveBeenCalledWith(
+        SeatHold,
+        { bookingId: booking.id, status: SeatHoldStatus.ACTIVE },
+        { status: SeatHoldStatus.RELEASED },
+      );
+      expect(publisher.publishConfirmed).not.toHaveBeenCalled();
+    });
+
     it('still returns the confirmed booking when the broker is down', async () => {
       const { service, publisher } = buildService(fakeManager(pendingBooking()));
       publisher.publishConfirmed.mockRejectedValue(new Error('broker down'));
