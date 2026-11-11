@@ -41,3 +41,8 @@ coverage/
 .cache/
 tmp/
 temp/
+
+# Local audit notes
+project-audit.md
+progress-log.md
+fix-log.md
