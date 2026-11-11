@@ -13,6 +13,7 @@ import { BookingRefGenerator } from './booking-ref.generator';
 import { TheatreBookingScopeService } from './theatre-booking-scope.service';
 import { AdminBookingsController } from './admin-bookings.controller';
 import { AdminBookingQueryService } from './admin-booking-query.service';
+import { HoldSweepService } from './hold-sweep.service';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { AdminBookingQueryService } from './admin-booking-query.service';
     BookingRefGenerator,
     TheatreBookingScopeService,
     AdminBookingQueryService,
+    HoldSweepService,
   ],
   exports: [
     HoldService,

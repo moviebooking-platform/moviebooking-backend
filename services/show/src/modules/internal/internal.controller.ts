@@ -1,4 +1,4 @@
-import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiExcludeController } from '@nestjs/swagger';
 import { SkipTransform } from '@moviebooking/common';
 import { InternalService } from './internal.service';
@@ -21,5 +21,15 @@ export class InternalController {
   @ApiOperation({ summary: 'Get show prices (internal)' })
   async getPricesByShowId(@Param('showId', ParseIntPipe) showId: number) {
     return this.internalService.getPricesByShowId(showId);
+  }
+
+  @Get('shows/by-screens')
+  @ApiOperation({
+    summary: 'Get show IDs by screen IDs (Task 14.2)',
+    description: 'Returns show IDs for the given screen IDs',
+  })
+  async getShowsByScreens(@Query('screenIds') screenIdsParam: string) {
+    const screenIds = screenIdsParam ? screenIdsParam.split(',').map(Number) : [];
+    return this.internalService.getShowIdsByScreens(screenIds);
   }
 }

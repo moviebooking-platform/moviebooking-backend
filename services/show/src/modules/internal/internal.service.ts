@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Show, ShowPrice } from '../../entities';
 import { throwError } from '@moviebooking/common';
 
@@ -33,5 +33,17 @@ export class InternalService {
     }
 
     return this.showPriceRepository.find({ where: { showId } });
+  }
+
+  /** Returns the IDs of all shows scheduled on any of the given screens. */
+  async getShowIdsByScreens(screenIds: number[]): Promise<number[]> {
+    if (!screenIds.length) return [];
+
+    const shows = await this.showRepository.find({
+      where: { screenId: In(screenIds) },
+      select: ['id'],
+    });
+
+    return shows.map((s) => s.id);
   }
 }
