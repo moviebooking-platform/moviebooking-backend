@@ -2,14 +2,29 @@ import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiExcludeController } from '@nestjs/swagger';
 import { SkipTransform } from '@moviebooking/common';
 import { InternalService } from './internal.service';
+import { ParseIdListPipe } from './pipes/parse-id-list.pipe';
 
-/** Internal APIs for service-to-service communication. No auth required. */
+/**
+ * Internal APIs for service-to-service communication. No auth required.
+ *
+ * Route order matters: Express matches routes in the order they are declared, so
+ * static paths such as `shows/by-screens` must come before `shows/:id`, otherwise
+ * "by-screens" is captured as an :id and rejected by ParseIntPipe.
+ */
 @ApiExcludeController()
 @ApiTags('internal')
 @SkipTransform()
 @Controller('internal')
 export class InternalController {
   constructor(private readonly internalService: InternalService) {}
+
+  @Get('shows/by-screens')
+  @ApiOperation({ summary: 'Get show IDs for the given screen IDs (internal)' })
+  async getShowsByScreens(
+    @Query('screenIds', new ParseIdListPipe('screenIds')) screenIds: number[],
+  ) {
+    return this.internalService.getShowIdsByScreens(screenIds);
+  }
 
   @Get('shows/:id')
   @ApiOperation({ summary: 'Get show by ID (internal)' })
@@ -21,15 +36,5 @@ export class InternalController {
   @ApiOperation({ summary: 'Get show prices (internal)' })
   async getPricesByShowId(@Param('showId', ParseIntPipe) showId: number) {
     return this.internalService.getPricesByShowId(showId);
-  }
-
-  @Get('shows/by-screens')
-  @ApiOperation({
-    summary: 'Get show IDs by screen IDs (Task 14.2)',
-    description: 'Returns show IDs for the given screen IDs',
-  })
-  async getShowsByScreens(@Query('screenIds') screenIdsParam: string) {
-    const screenIds = screenIdsParam ? screenIdsParam.split(',').map(Number) : [];
-    return this.internalService.getShowIdsByScreens(screenIds);
   }
 }
