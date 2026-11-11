@@ -76,7 +76,10 @@ export class InternalTransitionsService {
       ]);
 
       if (activeHoldCount !== seatCount) {
-        throwError('BUSINESS_RULE_VIOLATION', 'Not all seats have active holds');
+        throwError(
+          'BUSINESS_RULE_VIOLATION',
+          'Not all seats have active holds',
+        );
       }
 
       const paymentExpiresAt = this.calculatePaymentDeadline(booking, now);
@@ -129,7 +132,10 @@ export class InternalTransitionsService {
           );
         }
 
-        if (booking.paymentExpiresAt && booking.paymentExpiresAt <= new Date()) {
+        if (
+          booking.paymentExpiresAt &&
+          booking.paymentExpiresAt <= new Date()
+        ) {
           assertTransition(booking.status, BookingStatus.PENDING_REVIEW);
           booking.status = BookingStatus.PENDING_REVIEW;
           booking.needsReviewReason = 'VERIFIED_PAYMENT_AFTER_EXPIRY';
@@ -176,7 +182,9 @@ export class InternalTransitionsService {
     if (confirmed) {
       this.logger.log(`Booking ${bookingRef} confirmed`);
       await this.eventsPublisher.publishConfirmed(confirmed).catch((err) => {
-        this.logger.error(`Failed to publish booking.confirmed: ${err.message}`);
+        this.logger.error(
+          `Failed to publish booking.confirmed: ${err.message}`,
+        );
       });
     }
 

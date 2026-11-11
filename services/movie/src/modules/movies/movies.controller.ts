@@ -1,5 +1,19 @@
-import { Controller, Get, Post, Patch, Body, Query, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Body,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiParam,
+} from '@nestjs/swagger';
 import { MoviesService } from './movies.service';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
@@ -24,9 +38,15 @@ export class MoviesController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.SUPER_ADMIN, ROLES.STAFF)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Create movie', description: 'Create a new movie (Super Admin / Staff)' })
+  @ApiOperation({
+    summary: 'Create movie',
+    description: 'Create a new movie (Super Admin / Staff)',
+  })
   @ApiResponse({ status: 201, description: 'Movie created' })
-  @ApiResponse({ status: 409, description: 'Movie with same title and release date already exists' })
+  @ApiResponse({
+    status: 409,
+    description: 'Movie with same title and release date already exists',
+  })
   async create(@Body() dto: CreateMovieDto) {
     return this.moviesService.create(dto);
   }
@@ -34,7 +54,10 @@ export class MoviesController {
   @Get()
   @UseGuards(OptionalJwtAuthGuard)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'List movies', description: 'Guest: ACTIVE only. Authenticated: all statuses.' })
+  @ApiOperation({
+    summary: 'List movies',
+    description: 'Guest: ACTIVE only. Authenticated: all statuses.',
+  })
   @ApiResponse({ status: 200, description: 'Movies retrieved' })
   async findAll(
     @Query() query: ListMoviesQueryDto,
@@ -46,7 +69,10 @@ export class MoviesController {
   @Get(':id')
   @UseGuards(OptionalJwtAuthGuard)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Get movie detail', description: 'Movie details with images. Guest: ACTIVE only.' })
+  @ApiOperation({
+    summary: 'Get movie detail',
+    description: 'Movie details with images. Guest: ACTIVE only.',
+  })
   @ApiParam({ name: 'id', type: String, description: 'Encrypted Movie ID' })
   @ApiResponse({ status: 200, description: 'Movie retrieved' })
   @ApiResponse({ status: 404, description: 'Movie not found' })
@@ -61,14 +87,14 @@ export class MoviesController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.SUPER_ADMIN, ROLES.STAFF)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Update movie', description: 'Partial update (Super Admin / Staff)' })
+  @ApiOperation({
+    summary: 'Update movie',
+    description: 'Partial update (Super Admin / Staff)',
+  })
   @ApiParam({ name: 'id', type: String, description: 'Encrypted Movie ID' })
   @ApiResponse({ status: 200, description: 'Movie updated' })
   @ApiResponse({ status: 404, description: 'Movie not found' })
-  async update(
-    @DecryptId('id') id: number,
-    @Body() dto: UpdateMovieDto,
-  ) {
+  async update(@DecryptId('id') id: number, @Body() dto: UpdateMovieDto) {
     return this.moviesService.update(id, dto);
   }
 }

@@ -1,5 +1,10 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { RolesService } from './roles.service';
 import { JwtAuthGuard, RolesGuard, ROLES, Roles } from '@moviebooking/common';
 import { RoleResponseDto } from './dto/role-response.dto';
@@ -13,10 +18,20 @@ export class RolesController {
 
   @Get()
   @Roles(ROLES.SUPER_ADMIN)
-  @ApiOperation({ summary: 'List all roles', description: 'Get all available roles (Super Admin only)' })
-  @ApiResponse({ status: 200, description: 'Roles retrieved', type: [RoleResponseDto] })
+  @ApiOperation({
+    summary: 'List all roles',
+    description: 'Get all available roles (Super Admin only)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Roles retrieved',
+    type: [RoleResponseDto],
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden - requires SUPER_ADMIN role' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - requires SUPER_ADMIN role',
+  })
   async findAll() {
     return this.rolesService.findAll();
   }

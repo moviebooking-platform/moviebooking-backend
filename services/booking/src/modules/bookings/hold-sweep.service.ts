@@ -97,7 +97,9 @@ export class HoldSweepService {
           showId: expired.showId,
         })
         .catch((err) =>
-          this.logger.error(`Failed to publish booking.expired: ${err.message}`),
+          this.logger.error(
+            `Failed to publish booking.expired: ${err.message}`,
+          ),
         );
     } catch (error) {
       this.logger.error(

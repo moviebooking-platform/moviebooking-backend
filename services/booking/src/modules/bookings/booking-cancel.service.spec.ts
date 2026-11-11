@@ -69,7 +69,10 @@ describe('BookingCancelService', () => {
 
   it('returns 404 for an unknown reference', async () => {
     const { service } = build(null);
-    await expectAppError(service.cancelBooking('NOPE', 'guest@example.com'), 404);
+    await expectAppError(
+      service.cancelBooking('NOPE', 'guest@example.com'),
+      404,
+    );
   });
 
   it('returns 404 (not 403) when the email does not match', async () => {

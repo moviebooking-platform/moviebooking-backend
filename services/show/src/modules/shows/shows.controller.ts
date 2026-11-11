@@ -84,10 +84,7 @@ export class ShowsController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete show (Theatre Admin)' })
   @ApiParam({ name: 'id', type: String, description: 'Encrypted show ID' })
-  async delete(
-    @DecryptId('id') id: number,
-    @CurrentUser() user: ICurrentUser,
-  ) {
+  async delete(@DecryptId('id') id: number, @CurrentUser() user: ICurrentUser) {
     return this.showsService.delete(id, user);
   }
 }

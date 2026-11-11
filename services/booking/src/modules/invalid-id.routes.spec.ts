@@ -21,7 +21,10 @@ describe('Booking routes with an invalid encrypted ID', () => {
       controllers: [AvailabilityController, AdminBookingsController],
       providers: [
         { provide: AvailabilityService, useValue: availabilityService },
-        { provide: AdminBookingQueryService, useValue: adminBookingQueryService },
+        {
+          provide: AdminBookingQueryService,
+          useValue: adminBookingQueryService,
+        },
       ],
     })
       .overrideGuard(JwtAuthGuard)

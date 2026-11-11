@@ -3,7 +3,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOptionsWhere } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { User, Role, UserStatus } from '../../entities';
-import { throwError, PaginatedResponse, generateTempPassword, encryptId } from '@moviebooking/common';
+import {
+  throwError,
+  PaginatedResponse,
+  generateTempPassword,
+  encryptId,
+} from '@moviebooking/common';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ListUsersQueryDto } from './dto/list-users-query.dto';
 import { CreateUserDto } from './dto/create-user.dto';

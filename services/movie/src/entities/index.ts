@@ -1,1 +1,7 @@
-export { Movie, MovieImage, MovieRequest, MovieStatus, MovieRequestStatus } from '@moviebooking/database';
+export {
+  Movie,
+  MovieImage,
+  MovieRequest,
+  MovieStatus,
+  MovieRequestStatus,
+} from '@moviebooking/database';

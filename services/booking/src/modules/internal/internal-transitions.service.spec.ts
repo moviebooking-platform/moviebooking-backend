@@ -114,7 +114,9 @@ describe('InternalTransitionsService', () => {
 
     it('returns 422 when the hold has already expired', async () => {
       const { service } = buildService(
-        fakeManager(makeBooking({ holdExpiresAt: new Date(Date.now() - 1000) })),
+        fakeManager(
+          makeBooking({ holdExpiresAt: new Date(Date.now() - 1000) }),
+        ),
       );
       await expectAppError(service.markPaymentPending('REF0000001'), 422);
     });
@@ -129,8 +131,20 @@ describe('InternalTransitionsService', () => {
 
   describe('confirmBooking', () => {
     const seats = [
-      { bookingId: 7, seatId: 10, seatCode: 'A1', seatType: 'STANDARD', priceCents: 1000 },
-      { bookingId: 7, seatId: 11, seatCode: 'A2', seatType: 'VIP', priceCents: 1500 },
+      {
+        bookingId: 7,
+        seatId: 10,
+        seatCode: 'A1',
+        seatType: 'STANDARD',
+        priceCents: 1000,
+      },
+      {
+        bookingId: 7,
+        seatId: 11,
+        seatCode: 'A2',
+        seatType: 'VIP',
+        priceCents: 1500,
+      },
     ];
 
     function pendingBooking() {
@@ -213,7 +227,9 @@ describe('InternalTransitionsService', () => {
     });
 
     it('still returns the confirmed booking when the broker is down', async () => {
-      const { service, publisher } = buildService(fakeManager(pendingBooking()));
+      const { service, publisher } = buildService(
+        fakeManager(pendingBooking()),
+      );
       publisher.publishConfirmed.mockRejectedValue(new Error('broker down'));
 
       const result = await service.confirmBooking('REF0000001');

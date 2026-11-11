@@ -1,4 +1,11 @@
-import { IsOptional, IsInt, Min, IsString, IsEnum, IsDateString } from 'class-validator';
+import {
+  IsOptional,
+  IsInt,
+  Min,
+  IsString,
+  IsEnum,
+  IsDateString,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { MovieStatus } from '@moviebooking/database';
@@ -34,7 +41,9 @@ export class ListMoviesQueryDto {
   @IsInt()
   releaseYear?: number;
 
-  @ApiPropertyOptional({ description: 'Filter by exact release date (YYYY-MM-DD)' })
+  @ApiPropertyOptional({
+    description: 'Filter by exact release date (YYYY-MM-DD)',
+  })
   @IsOptional()
   @IsDateString()
   releaseDate?: string;

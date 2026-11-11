@@ -1,4 +1,10 @@
-import { IsString, IsNotEmpty, IsOptional, IsDateString, MaxLength } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsDateString,
+  MaxLength,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CreateMovieRequestDto {
@@ -8,7 +14,10 @@ export class CreateMovieRequestDto {
   @MaxLength(255)
   title: string;
 
-  @ApiPropertyOptional({ example: '2024-03-01', description: 'Known release date (YYYY-MM-DD)' })
+  @ApiPropertyOptional({
+    example: '2024-03-01',
+    description: 'Known release date (YYYY-MM-DD)',
+  })
   @IsOptional()
   @IsDateString()
   releaseDate?: string;

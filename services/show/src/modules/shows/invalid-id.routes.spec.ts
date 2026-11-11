@@ -30,7 +30,10 @@ describe('Show routes with an invalid encrypted ID', () => {
   const seatAvailabilityService = { getAvailability: jest.fn() };
   const showRepository = { findOne: jest.fn() };
 
-  const superAdmin = { id: 1, role: { id: 1, code: 'SUPER_ADMIN', name: 'Super Admin' } };
+  const superAdmin = {
+    id: 1,
+    role: { id: 1, code: 'SUPER_ADMIN', name: 'Super Admin' },
+  };
   const theatreAdmin = {
     id: 2,
     role: { id: 3, code: 'THEATRE_ADMIN', name: 'Theatre Admin' },
@@ -39,7 +42,11 @@ describe('Show routes with an invalid encrypted ID', () => {
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      controllers: [ShowsController, ShowPricesController, SeatAvailabilityController],
+      controllers: [
+        ShowsController,
+        ShowPricesController,
+        SeatAvailabilityController,
+      ],
       providers: [
         { provide: ShowsService, useValue: showsService },
         { provide: ShowPricesService, useValue: showPricesService },
@@ -88,7 +95,10 @@ describe('Show routes with an invalid encrypted ID', () => {
     ['GET', '/shows/not-an-id/prices'],
     ['GET', '/shows/not-an-id/seats'],
   ])('%s %s returns 400 for a guest', async (method, path) => {
-    expect(await call(method, path)).toEqual({ status: 400, code: 'VALIDATION_ERROR' });
+    expect(await call(method, path)).toEqual({
+      status: 400,
+      code: 'VALIDATION_ERROR',
+    });
     expect(showsService.findOne).not.toHaveBeenCalled();
     expect(showPricesService.getPrices).not.toHaveBeenCalled();
     expect(seatAvailabilityService.getAvailability).not.toHaveBeenCalled();
@@ -98,13 +108,19 @@ describe('Show routes with an invalid encrypted ID', () => {
     ['PATCH', '/shows/not-an-id'],
     ['DELETE', '/shows/not-an-id'],
     ['PUT', '/shows/not-an-id/prices'],
-  ])('%s %s returns 400 for a super admin without touching any show', async (method, path) => {
-    currentUser = superAdmin;
-    expect(await call(method, path)).toEqual({ status: 400, code: 'VALIDATION_ERROR' });
-    expect(showsService.update).not.toHaveBeenCalled();
-    expect(showsService.delete).not.toHaveBeenCalled();
-    expect(showPricesService.setPrices).not.toHaveBeenCalled();
-  });
+  ])(
+    '%s %s returns 400 for a super admin without touching any show',
+    async (method, path) => {
+      currentUser = superAdmin;
+      expect(await call(method, path)).toEqual({
+        status: 400,
+        code: 'VALIDATION_ERROR',
+      });
+      expect(showsService.update).not.toHaveBeenCalled();
+      expect(showsService.delete).not.toHaveBeenCalled();
+      expect(showPricesService.setPrices).not.toHaveBeenCalled();
+    },
+  );
 
   it('ShowOwnershipGuard returns 400 for a theatre admin before querying shows', async () => {
     currentUser = theatreAdmin;

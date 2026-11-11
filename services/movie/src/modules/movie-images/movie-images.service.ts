@@ -32,7 +32,9 @@ export class MovieImagesService {
   }
 
   async update(imageId: number, dto: UpdateMovieImageDto) {
-    const image = await this.movieImageRepository.findOne({ where: { id: imageId } });
+    const image = await this.movieImageRepository.findOne({
+      where: { id: imageId },
+    });
 
     if (!image) {
       throwError('NOT_FOUND', 'Image not found');
@@ -48,7 +50,9 @@ export class MovieImagesService {
   }
 
   async remove(imageId: number) {
-    const image = await this.movieImageRepository.findOne({ where: { id: imageId } });
+    const image = await this.movieImageRepository.findOne({
+      where: { id: imageId },
+    });
 
     if (!image) {
       throwError('NOT_FOUND', 'Image not found');
@@ -61,7 +65,9 @@ export class MovieImagesService {
   // Helper Methods
 
   private async verifyMovieExists(movieId: number) {
-    const movie = await this.movieRepository.findOne({ where: { id: movieId } });
+    const movie = await this.movieRepository.findOne({
+      where: { id: movieId },
+    });
     if (!movie) {
       throwError('NOT_FOUND', 'Movie not found');
     }
@@ -69,14 +75,21 @@ export class MovieImagesService {
   }
 
   // Minimal transaction: unset old primary, set new primary atomically
-  private async createWithPrimarySwap(movieId: number, dto: CreateMovieImageDto) {
+  private async createWithPrimarySwap(
+    movieId: number,
+    dto: CreateMovieImageDto,
+  ) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
       // Unset existing primary
-      await queryRunner.manager.update(MovieImage, { movieId, isPrimary: true }, { isPrimary: false });
+      await queryRunner.manager.update(
+        MovieImage,
+        { movieId, isPrimary: true },
+        { isPrimary: false },
+      );
 
       const image = queryRunner.manager.create(MovieImage, { ...dto, movieId });
       const saved = await queryRunner.manager.save(image);
@@ -97,7 +110,11 @@ export class MovieImagesService {
     await queryRunner.startTransaction();
 
     try {
-      await queryRunner.manager.update(MovieImage, { movieId: newPrimary.movieId, isPrimary: true }, { isPrimary: false });
+      await queryRunner.manager.update(
+        MovieImage,
+        { movieId: newPrimary.movieId, isPrimary: true },
+        { isPrimary: false },
+      );
       newPrimary.isPrimary = true;
       const saved = await queryRunner.manager.save(newPrimary);
 

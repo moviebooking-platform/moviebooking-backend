@@ -24,7 +24,11 @@ describe('DELETE /bookings/:bookingRef', () => {
 
     app = moduleRef.createNestApplication({ logger: false });
     app.useGlobalPipes(
-      new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true, transform: true }),
+      new ValidationPipe({
+        whitelist: true,
+        forbidNonWhitelisted: true,
+        transform: true,
+      }),
     );
     app.useGlobalFilters(new HttpExceptionFilter());
     await app.listen(0);
@@ -59,7 +63,9 @@ describe('DELETE /bookings/:bookingRef', () => {
       bookingRef: 'REF0000003',
       showId: 9,
       status: 'FAILED',
-      seats: [{ seatId: 10, seatCode: 'A1', seatType: 'STANDARD', priceCents: 1000 }],
+      seats: [
+        { seatId: 10, seatCode: 'A1', seatType: 'STANDARD', priceCents: 1000 },
+      ],
       totalAmountCents: 1000,
       currency: 'GBP',
       holdExpiresAt: null,

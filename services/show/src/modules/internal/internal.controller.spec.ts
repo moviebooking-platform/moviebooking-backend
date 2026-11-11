@@ -36,7 +36,9 @@ describe('InternalController routes', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('resolves GET /internal/shows/by-screens to the by-screens handler', async () => {
-    const res = await fetch(`${baseUrl}/internal/shows/by-screens?screenIds=3,1,3`);
+    const res = await fetch(
+      `${baseUrl}/internal/shows/by-screens?screenIds=3,1,3`,
+    );
 
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual([101, 102]);

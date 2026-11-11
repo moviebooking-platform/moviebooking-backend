@@ -18,8 +18,24 @@ import {
 // ID encryption is not initialised in these tests, so plain integers are valid IDs.
 const SHOW = { id: 1, screenId: 5, movieId: 2, status: 'ACTIVE' };
 const SEATS = [
-  { id: 10, screenId: 5, seatCode: 'A1', rowLabel: 'A', seatNumber: 1, seatType: 'STANDARD', status: 'ACTIVE' },
-  { id: 11, screenId: 5, seatCode: 'A2', rowLabel: 'A', seatNumber: 2, seatType: 'VIP', status: 'ACTIVE' },
+  {
+    id: 10,
+    screenId: 5,
+    seatCode: 'A1',
+    rowLabel: 'A',
+    seatNumber: 1,
+    seatType: 'STANDARD',
+    status: 'ACTIVE',
+  },
+  {
+    id: 11,
+    screenId: 5,
+    seatCode: 'A2',
+    rowLabel: 'A',
+    seatNumber: 2,
+    seatType: 'VIP',
+    status: 'ACTIVE',
+  },
 ];
 const PRICES = [
   { id: 1, showId: 1, seatType: 'STANDARD', amount: 1000, currency: 'GBP' },
@@ -99,14 +115,24 @@ function buildService(managerOptions: ManagerOptions = {}) {
     bookingRefGenerator as unknown as BookingRefGenerator,
   );
 
-  return { service, manager, dataSource, showClient, theatreClient, seatLockService };
+  return {
+    service,
+    manager,
+    dataSource,
+    showClient,
+    theatreClient,
+    seatLockService,
+  };
 }
 
 describe('HoldService', () => {
   describe('validation errors (before any lock or transaction)', () => {
     it('returns 400 for an invalid show ID', async () => {
       const { service, seatLockService } = buildService();
-      await expectAppError(service.holdSeats({ ...DTO, showId: 'not-an-id' }), 400);
+      await expectAppError(
+        service.holdSeats({ ...DTO, showId: 'not-an-id' }),
+        400,
+      );
       expect(seatLockService.acquire).not.toHaveBeenCalled();
     });
 
@@ -200,7 +226,9 @@ describe('HoldService', () => {
       ['A1', 1000],
       ['A2', 1500],
     ]);
-    expect(seatLockService.acquire.mock.calls.map((c) => c[1])).toEqual([10, 11]);
+    expect(seatLockService.acquire.mock.calls.map((c) => c[1])).toEqual([
+      10, 11,
+    ]);
     expect(seatLockService.release).toHaveBeenCalledTimes(2);
   });
 });

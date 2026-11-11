@@ -4,9 +4,7 @@ import { MigrationInterface, QueryRunner } from 'typeorm';
  * One-off data fix: bookings moved to PENDING_REVIEW before holds were released on
  * that transition still have ACTIVE holds, which block their seats indefinitely.
  */
-export class M6ReleasePendingReviewHolds1704844800000
-  implements MigrationInterface
-{
+export class M6ReleasePendingReviewHolds1704844800000 implements MigrationInterface {
   name = 'M6ReleasePendingReviewHolds1704844800000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {

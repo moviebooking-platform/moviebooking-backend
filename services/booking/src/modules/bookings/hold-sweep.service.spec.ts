@@ -24,7 +24,9 @@ function makeBooking(overrides: Record<string, unknown> = {}) {
   };
 }
 
-function build(lockedRows: Record<number, ReturnType<typeof makeBooking> | null>) {
+function build(
+  lockedRows: Record<number, ReturnType<typeof makeBooking> | null>,
+) {
   const manager = {
     findOne: jest.fn(async (_entity: unknown, options: any) => {
       const row = lockedRows[options.where.id];
@@ -94,10 +96,16 @@ describe('HoldSweepService', () => {
   });
 
   it.each([
-    ['was confirmed after it was selected', makeBooking({ status: BookingStatus.CONFIRMED })],
+    [
+      'was confirmed after it was selected',
+      makeBooking({ status: BookingStatus.CONFIRMED }),
+    ],
     [
       'moved to PAYMENT_PENDING with a later deadline',
-      makeBooking({ status: BookingStatus.PAYMENT_PENDING, paymentExpiresAt: future() }),
+      makeBooking({
+        status: BookingStatus.PAYMENT_PENDING,
+        paymentExpiresAt: future(),
+      }),
     ],
     ['no longer exists', null],
   ])('leaves a booking alone if it %s', async (_label, row) => {
