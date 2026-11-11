@@ -8,7 +8,9 @@
     "libs/*"
   ],
   "scripts": {
-    "build": "npm run build --workspaces --if-present",
+    "build": "npm run build:libs && npm run build:services",
+    "build:libs": "npm run build -w libs",
+    "build:services": "npm run build -w services",
     "start:dev": "npm run start:dev --workspaces --if-present",
     "lint": "npm run lint --workspaces --if-present",
     "lint:check": "npm run lint:check --workspaces --if-present",
