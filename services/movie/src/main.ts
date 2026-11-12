@@ -19,7 +19,9 @@ async function bootstrap() {
 
   const config = new DocumentBuilder()
     .setTitle('Movie Service API')
-    .setDescription('Movie catalogue and request management API for Movie Ticket Booking System')
+    .setDescription(
+      'Movie catalogue and request management API for Movie Ticket Booking System',
+    )
     .setVersion('1.0')
     .addBearerAuth(
       {

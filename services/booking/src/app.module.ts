@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ScheduleModule } from '@nestjs/schedule';
 import { DevModule } from '@moviebooking/common';
 import { Booking, BookingSeat, SeatHold } from './entities';
 import { AuthModule } from './modules/auth/auth.module';
@@ -41,6 +42,9 @@ const devModules = process.env.NODE_ENV !== 'production' ? [DevModule] : [];
         },
       }),
     }),
+
+    // Cron scheduler (used by the hold expiry sweep)
+    ScheduleModule.forRoot(),
 
     // Authentication
     AuthModule,

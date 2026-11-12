@@ -134,7 +134,7 @@ export class ScreensService {
       throwError('NOT_FOUND', 'Screen not found');
     }
 
-    // TODO: Check for future shows once Show Service is built
+    // TODO: refuse while the screen has future shows (needs a Show Service lookup)
     screen.status = ScreenStatus.INACTIVE;
     await this.screenRepository.save(screen);
 

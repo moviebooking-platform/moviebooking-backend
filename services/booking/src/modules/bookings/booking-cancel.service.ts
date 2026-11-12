@@ -11,7 +11,14 @@ import {
 import { assertTransition } from './booking-state';
 import { BookingEventsPublisher } from '../../messaging/booking-events.publisher';
 
-/** Handles guest-initiated booking cancellation. */
+/**
+ * Guest-initiated cancellation.
+ *
+ * Rules: the guest must give the booking email as well as the reference, and only a
+ * HOLDING booking can be cancelled. Once payment has started (PAYMENT_PENDING) the
+ * outcome belongs to the Payment Service, so a guest cancel could otherwise race a
+ * successful charge.
+ */
 @Injectable()
 export class BookingCancelService {
   private readonly logger = new Logger(BookingCancelService.name);
@@ -20,73 +27,62 @@ export class BookingCancelService {
     @InjectDataSource() private readonly dataSource: DataSource,
     @InjectRepository(Booking)
     private readonly bookingRepo: Repository<Booking>,
-    @InjectRepository(SeatHold)
-    private readonly seatHoldRepo: Repository<SeatHold>,
     private readonly eventsPublisher: BookingEventsPublisher,
   ) {}
 
-  /** Cancels booking if in HOLDING or PAYMENT_PENDING status. Publishes booking.failed event. */
-  async cancelBooking(booking: Booking): Promise<Booking> {
-    this.logger.log(`Cancelling booking: ${booking.bookingRef}`);
+  /** HOLDING → FAILED and releases the holds. Returns the booking with seats and holds. */
+  async cancelBooking(bookingRef: string, email: string): Promise<Booking> {
+    const cancelled = await this.dataSource.transaction(async (manager) => {
+      // The row lock serialises cancel with confirm, fail and the expiry sweep.
+      const booking = await manager.findOne(Booking, {
+        where: { bookingRef },
+        lock: { mode: 'pessimistic_write' },
+      });
 
-    // Validate current status allows cancellation
-    if (
-      ![BookingStatus.HOLDING, BookingStatus.PAYMENT_PENDING].includes(
-        booking.status,
-      )
-    ) {
-      throwError(
-        'BUSINESS_RULE_VIOLATION',
-        `Cannot cancel booking in ${booking.status} status. Only HOLDING or PAYMENT_PENDING bookings can be cancelled.`,
-      );
-    }
+      // A wrong email gets the same answer as an unknown reference, so the
+      // endpoint does not reveal which references exist.
+      if (!booking || !this.emailMatches(booking.email, email)) {
+        throwError('NOT_FOUND', `Booking ${bookingRef} not found`);
+      }
 
-    // Verify state transition is allowed
-    assertTransition(booking.status, BookingStatus.FAILED);
+      if (booking.status !== BookingStatus.HOLDING) {
+        throwError(
+          'BUSINESS_RULE_VIOLATION',
+          `Cannot cancel booking in ${booking.status} status. Only HOLDING bookings can be cancelled.`,
+        );
+      }
 
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-
-    try {
-      // Update booking status to FAILED
+      assertTransition(booking.status, BookingStatus.FAILED);
       booking.status = BookingStatus.FAILED;
-      await queryRunner.manager.save(booking);
+      await manager.save(Booking, booking);
 
-      // Release all active seat holds
-      await queryRunner.manager
-        .createQueryBuilder()
-        .update(SeatHold)
-        .set({ status: SeatHoldStatus.RELEASED })
-        .where('booking_id = :bookingId', { bookingId: booking.id })
-        .andWhere('status = :status', { status: SeatHoldStatus.ACTIVE })
-        .execute();
-
-      await queryRunner.commitTransaction();
-
-      this.logger.log(`Booking cancelled successfully: ${booking.bookingRef}`);
-
-      // Publish event (fire-and-forget)
-      this.eventsPublisher
-        .publishFailed({
-          bookingRef: booking.bookingRef,
-          showId: booking.showId,
-        })
-        .catch((err) => {
-          this.logger.error(
-            `Failed to publish booking.failed event: ${err.message}`,
-          );
-        });
+      await manager.update(
+        SeatHold,
+        { bookingId: booking.id, status: SeatHoldStatus.ACTIVE },
+        { status: SeatHoldStatus.RELEASED },
+      );
 
       return booking;
-    } catch (error) {
-      await queryRunner.rollbackTransaction();
-      this.logger.error(
-        `Failed to cancel booking ${booking.bookingRef}: ${error.message}`,
-      );
-      throw error;
-    } finally {
-      await queryRunner.release();
-    }
+    });
+
+    this.logger.log(`Booking cancelled: ${cancelled.bookingRef}`);
+
+    this.eventsPublisher
+      .publishFailed({
+        bookingRef: cancelled.bookingRef,
+        showId: cancelled.showId,
+      })
+      .catch((err) => {
+        this.logger.error(`Failed to publish booking.failed: ${err.message}`);
+      });
+
+    return this.bookingRepo.findOne({
+      where: { id: cancelled.id },
+      relations: ['seats', 'holds'],
+    });
+  }
+
+  private emailMatches(stored: string, given: string): boolean {
+    return stored.trim().toLowerCase() === given.trim().toLowerCase();
   }
 }

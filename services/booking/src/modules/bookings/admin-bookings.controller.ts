@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -8,6 +8,7 @@ import {
 } from '@nestjs/swagger';
 import {
   CurrentUser,
+  DecryptId,
   ICurrentUser,
   JwtAuthGuard,
   Roles,
@@ -58,11 +59,11 @@ export class AdminBookingsController {
   @ApiResponse({ status: 404, description: 'Booking or dependency not found' })
   @ApiResponse({ status: 503, description: 'Dependent service unavailable' })
   async getBookingDetail(
-    @Param('id') encryptedBookingId: string,
+    @DecryptId('id') bookingId: number,
     @CurrentUser() currentUser: ICurrentUser,
   ): Promise<AdminBookingDetailResponseDto> {
     return this.adminBookingQueryService.getBookingDetail(
-      encryptedBookingId,
+      bookingId,
       currentUser,
     );
   }

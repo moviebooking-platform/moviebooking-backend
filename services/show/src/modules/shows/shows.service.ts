@@ -216,7 +216,7 @@ export class ShowsService {
       await this.verifyScreenOwnership(show.screenId, user.theatreId);
     }
 
-    // TODO: Booking integration (M6) - block time changes when bookings exist
+    // TODO: block time changes when bookings exist (needs a Booking Service lookup)
     const hasBookings = false;
 
     if (hasBookings && (dto.startsAt || dto.endsAt)) {
@@ -260,7 +260,7 @@ export class ShowsService {
       await this.verifyScreenOwnership(show.screenId, user.theatreId);
     }
 
-    // TODO: Booking integration (M6) - block delete when bookings exist
+    // TODO: block delete when bookings exist (needs a Booking Service lookup)
     const hasBookings = false;
 
     if (hasBookings) {

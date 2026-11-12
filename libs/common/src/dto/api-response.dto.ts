@@ -17,7 +17,10 @@ export interface ApiMeta {
   requestId?: string;
 }
 
-export function successResponse<T>(data: T, meta?: Partial<ApiMeta>): ApiResponse<T> {
+export function successResponse<T>(
+  data: T,
+  meta?: Partial<ApiMeta>,
+): ApiResponse<T> {
   return {
     success: true,
     data,

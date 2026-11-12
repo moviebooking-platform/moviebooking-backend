@@ -1,6 +1,6 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
-import { decryptId } from '@moviebooking/common';
+import { DecryptId } from '@moviebooking/common';
 import { AvailabilityService } from './availability.service';
 
 @ApiTags('Seat Availability')
@@ -13,7 +13,8 @@ export class AvailabilityController {
   @ApiParam({ name: 'showId', type: String, description: 'Encrypted Show ID' })
   @ApiResponse({ status: 200, description: 'Seat map with summary' })
   @ApiResponse({ status: 404, description: 'Show not found or inactive' })
-  async getAvailability(@Param('showId') showId: string) {
-    return this.availabilityService.getAvailability(decryptId(showId));
+  @ApiResponse({ status: 400, description: 'Invalid show ID' })
+  async getAvailability(@DecryptId('showId') showId: number) {
+    return this.availabilityService.getAvailability(showId);
   }
 }

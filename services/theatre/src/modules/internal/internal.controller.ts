@@ -11,8 +11,8 @@ import { SkipTransform } from '@moviebooking/common';
 import { InternalService } from './internal.service';
 
 /**
- * Internal API — for service-to-service communication only.
- * No JWT required. In production, restrict via network policies.
+ * Internal API for service-to-service calls.
+ * Not authenticated: anything that can reach this port can call these routes.
  */
 @ApiTags('internal')
 @SkipTransform()
@@ -84,5 +84,19 @@ export class InternalController {
   @ApiResponse({ status: 200, description: 'Returns array of seats' })
   async getSeatsByScreenId(@Param('id', ParseIntPipe) id: number) {
     return this.internalService.getSeatsByScreenId(id);
+  }
+
+  @Get('theatres/:theatreId/screens')
+  @ApiOperation({
+    summary: 'Get all screen IDs for a theatre',
+    description:
+      'Internal endpoint for Booking Service admin scoping. Includes inactive screens so past bookings stay visible.',
+  })
+  @ApiParam({ name: 'theatreId', type: Number })
+  @ApiResponse({ status: 200, description: 'Returns array of screen IDs' })
+  async getScreenIdsByTheatre(
+    @Param('theatreId', ParseIntPipe) theatreId: number,
+  ) {
+    return this.internalService.getScreenIdsByTheatre(theatreId);
   }
 }

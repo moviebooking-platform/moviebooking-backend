@@ -39,7 +39,10 @@ export class ShowOwnershipGuard implements CanActivate {
 
       // For POST /shows, check screenId from body
       if (request.method === 'POST' && request.body?.screenId) {
-        const decryptedScreenId = decryptId(request.body.screenId);
+        const decryptedScreenId = this.decryptOrFail(
+          request.body.screenId,
+          'screenId',
+        );
         const screen = await this.theatreClient.getScreen(decryptedScreenId);
 
         if (!screen) {
@@ -58,7 +61,7 @@ export class ShowOwnershipGuard implements CanActivate {
       // For PATCH/DELETE /shows/:id, check show's screen ownership
       const showId = request.params.id || request.params.showId;
       if (showId) {
-        const decryptedShowId = decryptId(showId);
+        const decryptedShowId = this.decryptOrFail(showId, 'show ID');
         const show = await this.showRepository.findOne({
           where: { id: decryptedShowId },
         });
@@ -79,5 +82,18 @@ export class ShowOwnershipGuard implements CanActivate {
     }
 
     throw new AppException('FORBIDDEN', 'Access denied');
+  }
+
+  /**
+   * Guards run before parameter decorators, so IDs are decrypted here too. An invalid
+   * ID must stop the request: a null ID in a TypeORM `where` is ignored and would
+   * match an arbitrary row.
+   */
+  private decryptOrFail(encryptedId: unknown, label: string): number {
+    const id = typeof encryptedId === 'string' ? decryptId(encryptedId) : null;
+    if (id === null) {
+      throw new AppException('VALIDATION_ERROR', `Invalid ${label}`);
+    }
+    return id;
   }
 }

@@ -29,8 +29,8 @@ services:
       - RABBITMQ_DEFAULT_USER=moviebooking
       - RABBITMQ_DEFAULT_PASS=moviebooking123
     ports:
-      - "5672:5672"   # AMQP
-      - "15672:15672" # Management UI
+      - '5672:5672' # AMQP
+      - '15672:15672' # Management UI
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     healthcheck:
@@ -47,11 +47,11 @@ services:
     container_name: moviebooking-redis
     command: redis-server --requirepass redis123
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "redis123", "ping"]
+      test: ['CMD', 'redis-cli', '-a', 'redis123', 'ping']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -63,7 +63,7 @@ services:
     image: redis/redisinsight:latest
     container_name: moviebooking-redis-insight
     ports:
-      - "5540:5540"
+      - '5540:5540'
     volumes:
       - redis_insight_data:/data
     depends_on:

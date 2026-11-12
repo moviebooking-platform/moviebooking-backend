@@ -115,9 +115,7 @@ export class AuthService {
 
     // Add assignedTheatreId for Theatre Admin role
     if (user.role.code === ROLES.THEATRE_ADMIN) {
-      response.user.assignedTheatreId = theatreId
-        ? encryptId(theatreId)
-        : null;
+      response.user.assignedTheatreId = theatreId ? encryptId(theatreId) : null;
     }
 
     return response;
@@ -139,7 +137,10 @@ export class AuthService {
     }
 
     // Verify current password
-    const isPasswordValid = await bcrypt.compare(currentPassword, user.passwordHash);
+    const isPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.passwordHash,
+    );
     if (!isPasswordValid) {
       throwError('INVALID_CREDENTIALS', 'Current password is incorrect');
     }
@@ -147,7 +148,10 @@ export class AuthService {
     // Ensure new password is different from current
     const isSamePassword = await bcrypt.compare(newPassword, user.passwordHash);
     if (isSamePassword) {
-      throwError('VALIDATION_ERROR', 'New password must be different from current password');
+      throwError(
+        'VALIDATION_ERROR',
+        'New password must be different from current password',
+      );
     }
 
     // Hash and save new password
@@ -182,12 +186,10 @@ export class AuthService {
       status: user.status,
     };
 
-    // Add assignedTheatreId for Theatre Admin role 
+    // Add assignedTheatreId for Theatre Admin role
     if (user.role.code === ROLES.THEATRE_ADMIN) {
       const theatreId = await this.theatreClient.getTheatreIdByUserId(user.id);
-      profile.assignedTheatreId = theatreId
-        ? encryptId(theatreId)
-        : null;
+      profile.assignedTheatreId = theatreId ? encryptId(theatreId) : null;
     }
 
     return profile;
@@ -243,7 +245,10 @@ export class AuthService {
     }
   }
 
-  private generateAccessToken(user: User, theatreId: number | null = null): string {
+  private generateAccessToken(
+    user: User,
+    theatreId: number | null = null,
+  ): string {
     const payload: Partial<ICurrentUser> & { sub: number } = {
       sub: user.id,
       id: user.id,

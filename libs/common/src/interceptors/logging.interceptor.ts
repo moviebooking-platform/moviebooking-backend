@@ -18,9 +18,7 @@ export class LoggingInterceptor implements NestInterceptor {
     const requestId = request.headers['x-request-id'] || 'N/A';
     const startTime = Date.now();
 
-    this.logger.log(
-      `[${requestId}] ${method} ${url} - Request received`,
-    );
+    this.logger.log(`[${requestId}] ${method} ${url} - Request received`);
 
     return next.handle().pipe(
       tap({

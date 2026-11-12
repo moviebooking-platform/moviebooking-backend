@@ -1,4 +1,12 @@
-import { IsString, IsOptional, IsNumber, IsDateString, IsEnum, MaxLength, Min } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsNumber,
+  IsDateString,
+  IsEnum,
+  MaxLength,
+  Min,
+} from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { MovieStatus } from '@moviebooking/database';

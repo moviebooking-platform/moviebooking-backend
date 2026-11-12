@@ -16,6 +16,7 @@ import { mapReservationTiming } from './reservation-timing.mapper';
 import { BookingQueryService } from './booking-query.service';
 import { BookingCancelService } from './booking-cancel.service';
 import { HoldSeatsDto } from './dto/hold-seats.dto';
+import { CancelBookingDto } from './dto/cancel-booking.dto';
 import {
   BookingResponse,
   BookingSeatResponse,
@@ -87,30 +88,35 @@ export class BookingsController {
 
   @Delete(':bookingRef')
   @HttpCode(200)
-  @ApiOperation({ summary: 'Cancel a booking (guest cancellation)' })
+  @ApiOperation({
+    summary: 'Cancel a booking (guest cancellation)',
+    description:
+      'Requires the booking email in the JSON body. Only HOLDING bookings can be cancelled.',
+  })
   @ApiResponse({
     status: 200,
     description: 'Booking cancelled successfully',
     type: BookingResponse,
   })
+  @ApiResponse({ status: 400, description: 'Email missing or invalid' })
   @ApiResponse({
     status: 404,
-    description: 'Booking not found',
+    description: 'Booking not found, or email does not match',
   })
   @ApiResponse({
     status: 422,
-    description:
-      'Business rule violation (cannot cancel confirmed/expired booking)',
+    description: 'Booking is not in HOLDING status (payment already started)',
   })
   async cancelBooking(
     @Param('bookingRef') bookingRef: string,
+    @Body() dto: CancelBookingDto,
   ): Promise<BookingResponse> {
     this.logger.log(`Cancel request for booking: ${bookingRef}`);
 
-    const booking =
-      await this.bookingQueryService.getByReferenceOrFail(bookingRef);
-    const cancelledBooking =
-      await this.bookingCancelService.cancelBooking(booking);
+    const cancelledBooking = await this.bookingCancelService.cancelBooking(
+      bookingRef,
+      dto.email,
+    );
 
     return this.mapBookingResponse(cancelledBooking);
   }
@@ -119,7 +125,7 @@ export class BookingsController {
   private mapBookingResponse(booking: Booking): BookingResponse {
     const seats: BookingSeatResponse[] = booking.seats.map((seat) => ({
       seatId: encryptId(seat.seatId),
-      seatCode: `${seat.seatType}-${seat.seatId}`,
+      seatCode: seat.seatCode,
       seatType: seat.seatType,
       priceCents: seat.priceCents,
     }));

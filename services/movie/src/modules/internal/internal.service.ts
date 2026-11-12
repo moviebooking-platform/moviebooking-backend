@@ -54,7 +54,10 @@ export class InternalService {
     return movies.map((m) => this.mapMovie(m, imageMap.get(m.id) ?? null));
   }
 
-  private mapMovie(movie: Movie, primaryImageUrl: string | null): InternalMovieResponse {
+  private mapMovie(
+    movie: Movie,
+    primaryImageUrl: string | null,
+  ): InternalMovieResponse {
     return {
       id: movie.id,
       title: movie.title,

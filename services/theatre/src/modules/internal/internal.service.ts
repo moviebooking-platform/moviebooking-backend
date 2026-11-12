@@ -82,6 +82,15 @@ export class InternalService {
     }));
   }
 
+  /** Returns every screen ID (active or inactive) belonging to a theatre. */
+  async getScreenIdsByTheatre(theatreId: number): Promise<number[]> {
+    const screens = await this.screenRepository.find({
+      where: { theatreId },
+      select: ['id'],
+    });
+    return screens.map((s) => s.id);
+  }
+
   private mapTheatre(theatre: Theatre) {
     return {
       id: theatre.id,
