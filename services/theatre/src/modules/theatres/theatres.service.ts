@@ -31,7 +31,7 @@ export class TheatresService {
     return this.mapResponse(saved);
   }
 
-  async findAll(query: ListTheatresQueryDto, user?: ICurrentUser) {    
+  async findAll(query: ListTheatresQueryDto, user?: ICurrentUser) {
     const { page = 1, pageSize = 20, city } = query;
 
     const qb = this.theatreRepository.createQueryBuilder('theatre');
@@ -62,14 +62,16 @@ export class TheatresService {
 
   async findOne(id: number, user?: ICurrentUser) {
     const whereCondition: any = { id };
-    
+
     // Guest (unauthenticated): ACTIVE only
     // Authenticated users: all statuses
     if (!user) {
       whereCondition.status = TheatreStatus.ACTIVE;
     }
 
-    const theatre = await this.theatreRepository.findOne({ where: whereCondition });
+    const theatre = await this.theatreRepository.findOne({
+      where: whereCondition,
+    });
 
     if (!theatre) {
       throwError('NOT_FOUND', 'Theatre not found');
@@ -101,7 +103,7 @@ export class TheatresService {
       throwError('NOT_FOUND', 'Theatre not found');
     }
 
-    // TODO: Check for future shows once Show Service is built
+    // TODO: refuse while the theatre has future shows (needs a Show Service lookup)
     theatre.status = TheatreStatus.INACTIVE;
     await this.theatreRepository.save(theatre);
 

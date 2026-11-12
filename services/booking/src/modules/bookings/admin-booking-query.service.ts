@@ -111,10 +111,9 @@ export class AdminBookingQueryService {
   }
 
   async getBookingDetail(
-    encryptedBookingId: string,
+    bookingId: number,
     currentUser: ICurrentUser,
   ): Promise<AdminBookingDetailResponseDto> {
-    const bookingId = this.decryptBookingId(encryptedBookingId);
     const booking = await this.bookingRepository.findOne({
       where: { id: bookingId },
       relations: ['seats', 'holds'],
@@ -203,14 +202,6 @@ export class AdminBookingQueryService {
       );
     }
     throwError('FORBIDDEN');
-  }
-
-  private decryptBookingId(encryptedBookingId: string): number {
-    const bookingId = decryptId(encryptedBookingId);
-    if (bookingId === null || !Number.isInteger(bookingId) || bookingId <= 0) {
-      throwError('VALIDATION_ERROR', 'Invalid booking ID');
-    }
-    return bookingId;
   }
 
   private decryptShowId(showId?: string): number | undefined {

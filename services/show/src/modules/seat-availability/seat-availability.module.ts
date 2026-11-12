@@ -6,10 +6,7 @@ import { SeatAvailabilityService } from './seat-availability.service';
 import { TheatreClientModule } from '../../clients/theatre-client.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Show, ShowPrice]),
-    TheatreClientModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Show, ShowPrice]), TheatreClientModule],
   controllers: [SeatAvailabilityController],
   providers: [SeatAvailabilityService],
 })

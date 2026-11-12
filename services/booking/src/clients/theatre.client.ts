@@ -38,7 +38,7 @@ export class TheatreClient extends BookingServiceClient {
     return this.getOrNull<SeatDto[]>(`/api/internal/screens/${screenId}/seats`);
   }
 
-  /** Resolves the screen IDs belonging to a theatre, for admin scoping. Empty until the theatre-screens endpoint exists. */
+  /** Resolves the screen IDs belonging to a theatre (inactive included), for admin scoping. */
   async getScreensByTheatre(theatreId: number): Promise<number[]> {
     const result = await this.getOrNull<number[]>(
       `/api/internal/theatres/${theatreId}/screens`,

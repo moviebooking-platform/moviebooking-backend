@@ -38,7 +38,7 @@ export class ShowClient extends BookingServiceClient {
     return this.getOrNull<PriceDto[]>(`/api/internal/shows/${showId}/prices`);
   }
 
-  /** Resolves the show IDs running on the given screens, for admin theatre scoping. Empty until the by-screens endpoint exists. */
+  /** Resolves the show IDs scheduled on the given screens, for admin theatre scoping. */
   async getShowIdsByScreens(screenIds: number[]): Promise<number[]> {
     if (!screenIds.length) return [];
     const result = await this.getOrNull<number[]>(

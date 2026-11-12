@@ -6,7 +6,6 @@ import {
   Delete,
   Body,
   Query,
-  Param,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -41,8 +40,16 @@ export class ScreensController {
   @UseGuards(JwtAuthGuard, RolesGuard, TheatreOwnershipGuard)
   @Roles(ROLES.SUPER_ADMIN, ROLES.THEATRE_ADMIN)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Create screen', description: 'Create a new screen in a theatre (Theatre Admin: own theatre, Super Admin: any)' })
-  @ApiParam({ name: 'theatreId', type: String, description: 'Encrypted Theatre ID' })
+  @ApiOperation({
+    summary: 'Create screen',
+    description:
+      'Create a new screen in a theatre (Theatre Admin: own theatre, Super Admin: any)',
+  })
+  @ApiParam({
+    name: 'theatreId',
+    type: String,
+    description: 'Encrypted Theatre ID',
+  })
   @ApiResponse({ status: 201, description: 'Screen created' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
@@ -57,8 +64,16 @@ export class ScreensController {
   @Get()
   @UseGuards(OptionalJwtAuthGuard)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'List screens', description: 'List screens for a theatre. Guest: ACTIVE only. Authenticated: all statuses.' })
-  @ApiParam({ name: 'theatreId', type: String, description: 'Encrypted Theatre ID' })
+  @ApiOperation({
+    summary: 'List screens',
+    description:
+      'List screens for a theatre. Guest: ACTIVE only. Authenticated: all statuses.',
+  })
+  @ApiParam({
+    name: 'theatreId',
+    type: String,
+    description: 'Encrypted Theatre ID',
+  })
   @ApiResponse({ status: 200, description: 'Screens retrieved' })
   @ApiResponse({ status: 404, description: 'Theatre not found' })
   async findAll(
@@ -72,8 +87,15 @@ export class ScreensController {
   @Get(':id')
   @UseGuards(OptionalJwtAuthGuard)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Get screen detail', description: 'Screen details with seat count. Guest: ACTIVE only.' })
-  @ApiParam({ name: 'theatreId', type: String, description: 'Encrypted Theatre ID' })
+  @ApiOperation({
+    summary: 'Get screen detail',
+    description: 'Screen details with seat count. Guest: ACTIVE only.',
+  })
+  @ApiParam({
+    name: 'theatreId',
+    type: String,
+    description: 'Encrypted Theatre ID',
+  })
   @ApiParam({ name: 'id', type: String, description: 'Encrypted Screen ID' })
   @ApiResponse({ status: 200, description: 'Screen retrieved' })
   @ApiResponse({ status: 404, description: 'Screen not found' })
@@ -89,8 +111,16 @@ export class ScreensController {
   @UseGuards(JwtAuthGuard, RolesGuard, TheatreOwnershipGuard)
   @Roles(ROLES.SUPER_ADMIN, ROLES.THEATRE_ADMIN)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Update screen', description: 'Partial update (Theatre Admin: own theatre, Super Admin: any)' })
-  @ApiParam({ name: 'theatreId', type: String, description: 'Encrypted Theatre ID' })
+  @ApiOperation({
+    summary: 'Update screen',
+    description:
+      'Partial update (Theatre Admin: own theatre, Super Admin: any)',
+  })
+  @ApiParam({
+    name: 'theatreId',
+    type: String,
+    description: 'Encrypted Theatre ID',
+  })
   @ApiParam({ name: 'id', type: String, description: 'Encrypted Screen ID' })
   @ApiResponse({ status: 200, description: 'Screen updated' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -108,8 +138,16 @@ export class ScreensController {
   @UseGuards(JwtAuthGuard, RolesGuard, TheatreOwnershipGuard)
   @Roles(ROLES.SUPER_ADMIN, ROLES.THEATRE_ADMIN)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Delete screen', description: 'Soft-delete by setting INACTIVE (Theatre Admin: own theatre, Super Admin: any)' })
-  @ApiParam({ name: 'theatreId', type: String, description: 'Encrypted Theatre ID' })
+  @ApiOperation({
+    summary: 'Delete screen',
+    description:
+      'Soft-delete by setting INACTIVE (Theatre Admin: own theatre, Super Admin: any)',
+  })
+  @ApiParam({
+    name: 'theatreId',
+    type: String,
+    description: 'Encrypted Theatre ID',
+  })
   @ApiParam({ name: 'id', type: String, description: 'Encrypted Screen ID' })
   @ApiResponse({ status: 200, description: 'Screen deleted' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })

@@ -20,7 +20,11 @@ export class M2AddPasswordManagement1704153600000 implements MigrationInterface 
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`ALTER TABLE users DROP COLUMN password_expires_at`);
-    await queryRunner.query(`ALTER TABLE users DROP COLUMN must_change_password`);
+    await queryRunner.query(
+      `ALTER TABLE users DROP COLUMN password_expires_at`,
+    );
+    await queryRunner.query(
+      `ALTER TABLE users DROP COLUMN must_change_password`,
+    );
   }
 }

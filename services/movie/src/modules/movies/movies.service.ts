@@ -2,7 +2,13 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Movie, MovieImage, MovieStatus } from '../../entities';
-import { throwError, PaginatedResponse, encryptId, ICurrentUser, formatUtcDate } from '@moviebooking/common';
+import {
+  throwError,
+  PaginatedResponse,
+  encryptId,
+  ICurrentUser,
+  formatUtcDate,
+} from '@moviebooking/common';
 import { CreateMovieDto } from './dto/create-movie.dto';
 import { UpdateMovieDto } from './dto/update-movie.dto';
 import { ListMoviesQueryDto } from './dto/list-movies-query.dto';
@@ -34,7 +40,15 @@ export class MoviesService {
   }
 
   async findAll(query: ListMoviesQueryDto, user?: ICurrentUser) {
-    const { page = 1, pageSize = 20, search, language, releaseYear, releaseDate, status } = query;
+    const {
+      page = 1,
+      pageSize = 20,
+      search,
+      language,
+      releaseYear,
+      releaseDate,
+      status,
+    } = query;
 
     const qb = this.movieRepository.createQueryBuilder('movie');
 
@@ -69,19 +83,22 @@ export class MoviesService {
     const [movies, total] = await qb.getManyAndCount();
 
     // Batch fetch primary images for all movies (avoid N+1)
-    const movieIds = movies.map(m => m.id);
-    const primaryImages = movieIds.length > 0
-      ? await this.movieImageRepository
-          .createQueryBuilder('img')
-          .where('img.movieId IN (:...movieIds)', { movieIds })
-          .andWhere('img.isPrimary = :isPrimary', { isPrimary: true })
-          .getMany()
-      : [];
+    const movieIds = movies.map((m) => m.id);
+    const primaryImages =
+      movieIds.length > 0
+        ? await this.movieImageRepository
+            .createQueryBuilder('img')
+            .where('img.movieId IN (:...movieIds)', { movieIds })
+            .andWhere('img.isPrimary = :isPrimary', { isPrimary: true })
+            .getMany()
+        : [];
 
-    const imageMap = new Map(primaryImages.map(img => [img.movieId, img.imageUrl]));
+    const imageMap = new Map(
+      primaryImages.map((img) => [img.movieId, img.imageUrl]),
+    );
 
     return new PaginatedResponse(
-      movies.map(m => this.mapListResponse(m, imageMap.get(m.id))),
+      movies.map((m) => this.mapListResponse(m, imageMap.get(m.id))),
       total,
       page,
       pageSize,
@@ -116,9 +133,10 @@ export class MoviesService {
     // If changing title or releaseDate, check for duplicates
     if (dto.title !== undefined || dto.releaseDate !== undefined) {
       const newTitle = dto.title ?? movie.title;
-      const currentReleaseDate = movie.releaseDate instanceof Date
-        ? movie.releaseDate.toISOString().split('T')[0]
-        : String(movie.releaseDate).split('T')[0];
+      const currentReleaseDate =
+        movie.releaseDate instanceof Date
+          ? movie.releaseDate.toISOString().split('T')[0]
+          : String(movie.releaseDate).split('T')[0];
       const newReleaseDate = dto.releaseDate ?? currentReleaseDate;
 
       if (newTitle !== movie.title || newReleaseDate !== currentReleaseDate) {
@@ -137,7 +155,11 @@ export class MoviesService {
 
   // Helper Methods
 
-  private async checkMovieDuplicate(title: string, releaseDate: string, excludeId?: number) {
+  private async checkMovieDuplicate(
+    title: string,
+    releaseDate: string,
+    excludeId?: number,
+  ) {
     const qb = this.movieRepository
       .createQueryBuilder('movie')
       .where('movie.title = :title', { title })
@@ -150,7 +172,10 @@ export class MoviesService {
     const existing = await qb.getOne();
 
     if (existing) {
-      throwError('DUPLICATE_RESOURCE', `Movie "${title}" with release date ${releaseDate} already exists`);
+      throwError(
+        'DUPLICATE_RESOURCE',
+        `Movie "${title}" with release date ${releaseDate} already exists`,
+      );
     }
   }
 
@@ -184,11 +209,12 @@ export class MoviesService {
     return {
       ...this.mapResponse(movie),
       primaryImageUrl: primaryImage?.imageUrl ?? null,
-      images: movie.images?.map((img: MovieImage) => ({
-        id: encryptId(img.id),
-        imageUrl: img.imageUrl,
-        isPrimary: img.isPrimary,
-      })) ?? [],
+      images:
+        movie.images?.map((img: MovieImage) => ({
+          id: encryptId(img.id),
+          imageUrl: img.imageUrl,
+          isPrimary: img.isPrimary,
+        })) ?? [],
     };
   }
 }

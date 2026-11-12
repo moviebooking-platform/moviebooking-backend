@@ -14,7 +14,11 @@ import {
 import { CreateShowDto } from './dto/create-show.dto';
 import { UpdateShowDto } from './dto/update-show.dto';
 import { ListShowsQueryDto } from './dto/list-shows-query.dto';
-import { TheatreClient, ScreenDto, TheatreDto } from '../../clients/theatre.client';
+import {
+  TheatreClient,
+  ScreenDto,
+  TheatreDto,
+} from '../../clients/theatre.client';
 import { MovieClient, MovieDto } from '../../clients/movie.client';
 
 @Injectable()
@@ -122,7 +126,9 @@ export class ShowsService {
         return new PaginatedResponse([], 0, page, pageSize);
       }
 
-      qb.andWhere('show.screenId IN (:...matchingScreenIds)', { matchingScreenIds });
+      qb.andWhere('show.screenId IN (:...matchingScreenIds)', {
+        matchingScreenIds,
+      });
     }
 
     if (date) {
@@ -192,7 +198,9 @@ export class ShowsService {
       this.showPriceRepository.find({ where: { showId: show.id } }),
     ]);
 
-    const theatre = screen ? await this.theatreClient.getTheatre(screen.theatreId) : null;
+    const theatre = screen
+      ? await this.theatreClient.getTheatre(screen.theatreId)
+      : null;
 
     return this.mapDetailResponse(show, movie, screen, theatre, prices);
   }
@@ -208,11 +216,14 @@ export class ShowsService {
       await this.verifyScreenOwnership(show.screenId, user.theatreId);
     }
 
-    // TODO: Booking integration (M6) - block time changes when bookings exist
+    // TODO: block time changes when bookings exist (needs a Booking Service lookup)
     const hasBookings = false;
 
     if (hasBookings && (dto.startsAt || dto.endsAt)) {
-      throwError('BUSINESS_RULE_VIOLATION', 'Cannot update show times when bookings exist');
+      throwError(
+        'BUSINESS_RULE_VIOLATION',
+        'Cannot update show times when bookings exist',
+      );
     }
 
     if (dto.startsAt || dto.endsAt) {
@@ -220,7 +231,10 @@ export class ShowsService {
       const newEndsAt = dto.endsAt ? new Date(dto.endsAt) : show.endsAt;
 
       if (newEndsAt <= newStartsAt) {
-        throwError('VALIDATION_ERROR', 'Show end time must be after start time');
+        throwError(
+          'VALIDATION_ERROR',
+          'Show end time must be after start time',
+        );
       }
 
       await this.checkOverlap(show.screenId, newStartsAt, newEndsAt, id);
@@ -246,11 +260,14 @@ export class ShowsService {
       await this.verifyScreenOwnership(show.screenId, user.theatreId);
     }
 
-    // TODO: Booking integration (M6) - block delete when bookings exist
+    // TODO: block delete when bookings exist (needs a Booking Service lookup)
     const hasBookings = false;
 
     if (hasBookings) {
-      throwError('BUSINESS_RULE_VIOLATION', 'Cannot delete show with existing bookings');
+      throwError(
+        'BUSINESS_RULE_VIOLATION',
+        'Cannot delete show with existing bookings',
+      );
     }
 
     await this.showRepository.softDelete(id);
@@ -280,12 +297,18 @@ export class ShowsService {
 
     const conflict = await qb.getOne();
     if (conflict) {
-      throwError('DUPLICATE_RESOURCE', `Show overlaps with existing show (${encryptId(conflict.id)})`);
+      throwError(
+        'DUPLICATE_RESOURCE',
+        `Show overlaps with existing show (${encryptId(conflict.id)})`,
+      );
     }
   }
 
   /** Verifies that the screen belongs to the theatre. */
-  private async verifyScreenOwnership(screenId: number, theatreId: number): Promise<void> {
+  private async verifyScreenOwnership(
+    screenId: number,
+    theatreId: number,
+  ): Promise<void> {
     const screen = await this.theatreClient.getScreen(screenId);
 
     if (!screen) {
@@ -293,7 +316,10 @@ export class ShowsService {
     }
 
     if (screen.theatreId !== theatreId) {
-      throwError('FORBIDDEN', 'You can only manage shows for your assigned theatre');
+      throwError(
+        'FORBIDDEN',
+        'You can only manage shows for your assigned theatre',
+      );
     }
   }
 
@@ -332,7 +358,9 @@ export class ShowsService {
 
     const movieMap = new Map<number, MovieDto>(movies.map((m) => [m.id, m]));
     const screenMap = new Map<number, ScreenDto>(screens.map((s) => [s.id, s]));
-    const theatreMap = new Map<number, TheatreDto>(theatres.map((t) => [t.id, t]));
+    const theatreMap = new Map<number, TheatreDto>(
+      theatres.map((t) => [t.id, t]),
+    );
 
     const pricingMap = new Map<number, ShowPrice[]>();
     for (const price of prices) {
@@ -441,7 +469,9 @@ export class ShowsService {
   }
 
   /** Formats prices keyed by seat type for easy frontend consumption. */
-  private formatPricing(prices: ShowPrice[]): Record<string, { amount: number; currency: string }> {
+  private formatPricing(
+    prices: ShowPrice[],
+  ): Record<string, { amount: number; currency: string }> {
     const result: Record<string, { amount: number; currency: string }> = {};
     for (const p of prices) {
       result[p.seatType] = { amount: p.amount, currency: p.currency };

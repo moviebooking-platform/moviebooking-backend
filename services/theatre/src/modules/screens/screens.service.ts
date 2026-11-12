@@ -43,7 +43,11 @@ export class ScreensService {
     return this.mapResponse(saved);
   }
 
-  async findAll(theatreId: number, query: ListScreensQueryDto, user?: ICurrentUser) {
+  async findAll(
+    theatreId: number,
+    query: ListScreensQueryDto,
+    user?: ICurrentUser,
+  ) {
     const { page = 1, pageSize = 20 } = query;
 
     // Verify theatre exists
@@ -55,7 +59,8 @@ export class ScreensService {
       throwError('NOT_FOUND', 'Theatre not found');
     }
 
-    const qb = this.screenRepository.createQueryBuilder('screen')
+    const qb = this.screenRepository
+      .createQueryBuilder('screen')
       .where('screen.theatreId = :theatreId', { theatreId });
 
     // Guest (unauthenticated): ACTIVE only
@@ -83,7 +88,6 @@ export class ScreensService {
     return new PaginatedResponse(screensWithCounts, total, page, pageSize);
   }
 
-
   async findOne(theatreId: number, screenId: number, user?: ICurrentUser) {
     const whereCondition: any = { id: screenId, theatreId };
 
@@ -92,7 +96,9 @@ export class ScreensService {
       whereCondition.status = ScreenStatus.ACTIVE;
     }
 
-    const screen = await this.screenRepository.findOne({ where: whereCondition });
+    const screen = await this.screenRepository.findOne({
+      where: whereCondition,
+    });
 
     if (!screen) {
       throwError('NOT_FOUND', 'Screen not found');
@@ -128,7 +134,7 @@ export class ScreensService {
       throwError('NOT_FOUND', 'Screen not found');
     }
 
-    // TODO: Check for future shows once Show Service is built
+    // TODO: refuse while the screen has future shows (needs a Show Service lookup)
     screen.status = ScreenStatus.INACTIVE;
     await this.screenRepository.save(screen);
 

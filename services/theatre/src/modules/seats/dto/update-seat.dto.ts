@@ -1,4 +1,11 @@
-import { IsString, IsInt, IsEnum, IsOptional, MaxLength, Min } from 'class-validator';
+import {
+  IsString,
+  IsInt,
+  IsEnum,
+  IsOptional,
+  MaxLength,
+  Min,
+} from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { SeatType, SeatStatus } from '@moviebooking/database';
 

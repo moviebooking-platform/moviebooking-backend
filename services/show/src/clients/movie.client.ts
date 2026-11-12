@@ -31,7 +31,9 @@ export class MovieClient extends BaseServiceClient {
   /** Fetches multiple movies in a single call. Returns empty array on failure. */
   async getMoviesByIds(movieIds: number[]): Promise<MovieDto[]> {
     if (!movieIds.length) return [];
-    const result = await this.post<MovieDto[]>('/api/internal/movies/batch', { movieIds });
+    const result = await this.post<MovieDto[]>('/api/internal/movies/batch', {
+      movieIds,
+    });
     return result ?? [];
   }
 

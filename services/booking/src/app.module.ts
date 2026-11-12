@@ -1,11 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ScheduleModule } from '@nestjs/schedule';
 import { DevModule } from '@moviebooking/common';
 import { Booking, BookingSeat, SeatHold } from './entities';
 import { AuthModule } from './modules/auth/auth.module';
 import { AvailabilityModule } from './modules/availability/availability.module';
 import { BookingsModule } from './modules/bookings/bookings.module';
+import { InternalModule } from './modules/internal/internal.module';
 import { RedisModule } from './redis/redis.module';
 import { MessagingModule } from './messaging/messaging.module';
 
@@ -41,6 +43,9 @@ const devModules = process.env.NODE_ENV !== 'production' ? [DevModule] : [];
       }),
     }),
 
+    // Cron scheduler (used by the hold expiry sweep)
+    ScheduleModule.forRoot(),
+
     // Authentication
     AuthModule,
 
@@ -49,6 +54,9 @@ const devModules = process.env.NODE_ENV !== 'production' ? [DevModule] : [];
 
     // Seat hold and booking management (write path)
     BookingsModule,
+
+    // Internal endpoints for Payment Service
+    InternalModule,
 
     // Redis seat-lock infrastructure (global)
     RedisModule,

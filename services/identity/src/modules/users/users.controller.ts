@@ -19,8 +19,17 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdateStatusDto } from './dto/update-status.dto';
 import { ListUsersQueryDto } from './dto/list-users-query.dto';
-import { UserResponseDto, PaginatedUsersResponseDto } from './dto/user-response.dto';
-import { JwtAuthGuard, RolesGuard, ROLES, DecryptId, Roles } from '@moviebooking/common';
+import {
+  UserResponseDto,
+  PaginatedUsersResponseDto,
+} from './dto/user-response.dto';
+import {
+  JwtAuthGuard,
+  RolesGuard,
+  ROLES,
+  DecryptId,
+  Roles,
+} from '@moviebooking/common';
 
 @ApiTags('users')
 @ApiBearerAuth('JWT-auth')
@@ -31,21 +40,41 @@ export class UsersController {
 
   @Get()
   @Roles(ROLES.SUPER_ADMIN)
-  @ApiOperation({ summary: 'List all users', description: 'Get paginated list of users (Super Admin only)' })
-  @ApiResponse({ status: 200, description: 'Users retrieved', type: PaginatedUsersResponseDto })
+  @ApiOperation({
+    summary: 'List all users',
+    description: 'Get paginated list of users (Super Admin only)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Users retrieved',
+    type: PaginatedUsersResponseDto,
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden - requires SUPER_ADMIN role' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - requires SUPER_ADMIN role',
+  })
   async findAll(@Query() query: ListUsersQueryDto) {
     return this.usersService.findAll(query);
   }
 
   @Post()
   @Roles(ROLES.SUPER_ADMIN)
-  @ApiOperation({ summary: 'Create user', description: 'Create a new user (Super Admin only)' })
-  @ApiResponse({ status: 201, description: 'User created', type: UserResponseDto })
+  @ApiOperation({
+    summary: 'Create user',
+    description: 'Create a new user (Super Admin only)',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'User created',
+    type: UserResponseDto,
+  })
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden - requires SUPER_ADMIN role' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - requires SUPER_ADMIN role',
+  })
   @ApiResponse({ status: 409, description: 'Email already exists' })
   async create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
@@ -53,11 +82,21 @@ export class UsersController {
 
   @Get(':id')
   @Roles(ROLES.SUPER_ADMIN)
-  @ApiOperation({ summary: 'Get user by ID', description: 'Get user details (Super Admin only)' })
+  @ApiOperation({
+    summary: 'Get user by ID',
+    description: 'Get user details (Super Admin only)',
+  })
   @ApiParam({ name: 'id', type: String, description: 'Encrypted User ID' })
-  @ApiResponse({ status: 200, description: 'User retrieved', type: UserResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'User retrieved',
+    type: UserResponseDto,
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden - requires SUPER_ADMIN role' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - requires SUPER_ADMIN role',
+  })
   @ApiResponse({ status: 404, description: 'User not found' })
   async findOne(@DecryptId('id') id: number) {
     return this.usersService.findOne(id);
@@ -65,12 +104,22 @@ export class UsersController {
 
   @Patch(':id')
   @Roles(ROLES.SUPER_ADMIN)
-  @ApiOperation({ summary: 'Update user', description: 'Update user details (Super Admin only)' })
+  @ApiOperation({
+    summary: 'Update user',
+    description: 'Update user details (Super Admin only)',
+  })
   @ApiParam({ name: 'id', type: String, description: 'Encrypted User ID' })
-  @ApiResponse({ status: 200, description: 'User updated', type: UserResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'User updated',
+    type: UserResponseDto,
+  })
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden - requires SUPER_ADMIN role' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - requires SUPER_ADMIN role',
+  })
   @ApiResponse({ status: 404, description: 'User not found' })
   async update(
     @DecryptId('id') id: number,
@@ -81,11 +130,17 @@ export class UsersController {
 
   @Patch(':id/password')
   @Roles(ROLES.SUPER_ADMIN)
-  @ApiOperation({ summary: 'Reset user password', description: 'Generate new temporary password for user (Super Admin only)' })
+  @ApiOperation({
+    summary: 'Reset user password',
+    description: 'Generate new temporary password for user (Super Admin only)',
+  })
   @ApiParam({ name: 'id', type: String, description: 'Encrypted User ID' })
   @ApiResponse({ status: 200, description: 'Password reset successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden - requires SUPER_ADMIN role' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - requires SUPER_ADMIN role',
+  })
   @ApiResponse({ status: 404, description: 'User not found' })
   async resetPassword(@DecryptId('id') id: number) {
     return this.usersService.resetPassword(id);
@@ -93,12 +148,22 @@ export class UsersController {
 
   @Patch(':id/status')
   @Roles(ROLES.SUPER_ADMIN)
-  @ApiOperation({ summary: 'Update user status', description: 'Enable or disable user (Super Admin only)' })
+  @ApiOperation({
+    summary: 'Update user status',
+    description: 'Enable or disable user (Super Admin only)',
+  })
   @ApiParam({ name: 'id', type: String, description: 'Encrypted User ID' })
-  @ApiResponse({ status: 200, description: 'Status updated', type: UserResponseDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Status updated',
+    type: UserResponseDto,
+  })
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 403, description: 'Forbidden - requires SUPER_ADMIN role' })
+  @ApiResponse({
+    status: 403,
+    description: 'Forbidden - requires SUPER_ADMIN role',
+  })
   @ApiResponse({ status: 404, description: 'User not found' })
   async updateStatus(
     @DecryptId('id') id: number,

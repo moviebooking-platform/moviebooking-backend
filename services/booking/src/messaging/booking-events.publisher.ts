@@ -21,7 +21,7 @@ export interface BookingFailedEvent {
   showId: number;
 }
 
-/** Emits booking lifecycle events to the topic exchange consumed by Payment/Notification. */
+/** Emits booking lifecycle events to the booking topic exchange. No service consumes them yet. */
 @Injectable()
 export class BookingEventsPublisher {
   // Must match the exchange the module declares, hence the same env key.

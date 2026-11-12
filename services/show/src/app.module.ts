@@ -11,9 +11,8 @@ import { InternalModule } from './modules/internal/internal.module';
 
 const devModules = process.env.NODE_ENV !== 'production' ? [DevModule] : [];
 
-
 /** Root module for Show Service. Configures database, auth, and feature modules. */
- 
+
 @Module({
   imports: [
     // Global configuration

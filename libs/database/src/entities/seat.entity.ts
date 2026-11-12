@@ -1,4 +1,11 @@
-import { Entity, Column, ManyToOne, JoinColumn, BeforeInsert, BeforeUpdate } from 'typeorm';
+import {
+  Entity,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  BeforeInsert,
+  BeforeUpdate,
+} from 'typeorm';
 import { BaseEntity } from './base.entity';
 import { Screen } from './screen.entity';
 import { SeatType, SeatStatus } from '../enums';

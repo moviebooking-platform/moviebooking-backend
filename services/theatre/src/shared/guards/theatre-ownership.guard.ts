@@ -1,5 +1,10 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
-import { ICurrentUser, AppException, ROLES, decryptId } from '@moviebooking/common';
+import {
+  ICurrentUser,
+  AppException,
+  ROLES,
+  decryptId,
+} from '@moviebooking/common';
 
 @Injectable()
 export class TheatreOwnershipGuard implements CanActivate {
@@ -22,7 +27,10 @@ export class TheatreOwnershipGuard implements CanActivate {
     if (urlTheatreId) {
       const decryptedTheatreId = decryptId(urlTheatreId);
       if (decryptedTheatreId !== user.theatreId) {
-        throw new AppException('FORBIDDEN', 'You can only access your assigned theatre');
+        throw new AppException(
+          'FORBIDDEN',
+          'You can only access your assigned theatre',
+        );
       }
     }
 

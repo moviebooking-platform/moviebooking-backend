@@ -1,8 +1,20 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
-import { Movie, MovieRequest, MovieRequestStatus, MovieStatus } from '../../entities';
-import { throwError, PaginatedResponse, encryptId, ICurrentUser, ROLES, formatUtcDate } from '@moviebooking/common';
+import {
+  Movie,
+  MovieRequest,
+  MovieRequestStatus,
+  MovieStatus,
+} from '../../entities';
+import {
+  throwError,
+  PaginatedResponse,
+  encryptId,
+  ICurrentUser,
+  ROLES,
+  formatUtcDate,
+} from '@moviebooking/common';
 import { CreateMovieRequestDto } from './dto/create-movie-request.dto';
 import { ReviewMovieRequestDto } from './dto/review-movie-request.dto';
 import { ListMovieRequestsQueryDto } from './dto/list-movie-requests-query.dto';
@@ -35,20 +47,27 @@ export class MovieRequestsService {
     });
 
     if (duplicate) {
-      throwError('DUPLICATE_RESOURCE', `A pending request for "${dto.title}" already exists for your theatre`);
+      throwError(
+        'DUPLICATE_RESOURCE',
+        `A pending request for "${dto.title}" already exists for your theatre`,
+      );
     }
 
     const request = this.movieRequestRepository.create({
       ...dto,
       releaseDate: dto.releaseDate ? new Date(dto.releaseDate) : null,
-      expectedReleaseDate: dto.expectedReleaseDate ? new Date(dto.expectedReleaseDate) : null,
+      expectedReleaseDate: dto.expectedReleaseDate
+        ? new Date(dto.expectedReleaseDate)
+        : null,
       theatreId: user.theatreId,
       requestedByUserId: user.id,
       status: MovieRequestStatus.PENDING,
     });
 
     const saved = await this.movieRequestRepository.save(request);
-    this.logger.log(`Movie request created: "${saved.title}" by user ${user.id}`);
+    this.logger.log(
+      `Movie request created: "${saved.title}" by user ${user.id}`,
+    );
     return this.mapResponse(saved);
   }
 
@@ -76,7 +95,7 @@ export class MovieRequestsService {
     const [requests, total] = await qb.getManyAndCount();
 
     return new PaginatedResponse(
-      requests.map(r => this.mapResponse(r)),
+      requests.map((r) => this.mapResponse(r)),
       total,
       page,
       pageSize,
@@ -94,7 +113,10 @@ export class MovieRequestsService {
     }
 
     // Theatre Admin can only see own requests
-    if (user.role?.code === ROLES.THEATRE_ADMIN && request.theatreId !== user.theatreId) {
+    if (
+      user.role?.code === ROLES.THEATRE_ADMIN &&
+      request.theatreId !== user.theatreId
+    ) {
       throwError('NOT_FOUND', 'Movie request not found');
     }
 
@@ -102,14 +124,19 @@ export class MovieRequestsService {
   }
 
   async approve(id: number, dto: ReviewMovieRequestDto, user: ICurrentUser) {
-    const request = await this.movieRequestRepository.findOne({ where: { id } });
+    const request = await this.movieRequestRepository.findOne({
+      where: { id },
+    });
 
     if (!request) {
       throwError('NOT_FOUND', 'Movie request not found');
     }
 
     if (request.status !== MovieRequestStatus.PENDING) {
-      throwError('BUSINESS_RULE_VIOLATION', 'Only PENDING requests can be approved');
+      throwError(
+        'BUSINESS_RULE_VIOLATION',
+        'Only PENDING requests can be approved',
+      );
     }
 
     // Atomic: create movie + update request in one transaction
@@ -122,7 +149,8 @@ export class MovieRequestsService {
       const movie = queryRunner.manager.create(Movie, {
         title: request.title,
         description: request.description,
-        releaseDate: request.releaseDate ?? request.expectedReleaseDate ?? new Date(),
+        releaseDate:
+          request.releaseDate ?? request.expectedReleaseDate ?? new Date(),
         cast: request.cast,
         director: request.director,
         language: request.language,
@@ -141,11 +169,19 @@ export class MovieRequestsService {
       const savedRequest = await queryRunner.manager.save(request);
       await queryRunner.commitTransaction();
 
-      this.logger.log(`Movie request ${id} approved, movie created: ${savedMovie.id}`);
-      return this.mapDetailResponse({ ...savedRequest, createdMovie: savedMovie });
+      this.logger.log(
+        `Movie request ${id} approved, movie created: ${savedMovie.id}`,
+      );
+      return this.mapDetailResponse({
+        ...savedRequest,
+        createdMovie: savedMovie,
+      });
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      this.logger.error(`Failed to approve request ${id}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to approve request ${id}: ${error.message}`,
+        error.stack,
+      );
       throw error;
     } finally {
       await queryRunner.release();
@@ -153,14 +189,19 @@ export class MovieRequestsService {
   }
 
   async reject(id: number, dto: ReviewMovieRequestDto, user: ICurrentUser) {
-    const request = await this.movieRequestRepository.findOne({ where: { id } });
+    const request = await this.movieRequestRepository.findOne({
+      where: { id },
+    });
 
     if (!request) {
       throwError('NOT_FOUND', 'Movie request not found');
     }
 
     if (request.status !== MovieRequestStatus.PENDING) {
-      throwError('BUSINESS_RULE_VIOLATION', 'Only PENDING requests can be rejected');
+      throwError(
+        'BUSINESS_RULE_VIOLATION',
+        'Only PENDING requests can be rejected',
+      );
     }
 
     request.status = MovieRequestStatus.REJECTED;
@@ -187,10 +228,14 @@ export class MovieRequestsService {
       expectedReleaseDate: formatUtcDate(request.expectedReleaseDate),
       notes: request.notes,
       status: request.status,
-      reviewedByUserId: request.reviewedByUserId ? encryptId(request.reviewedByUserId) : null,
+      reviewedByUserId: request.reviewedByUserId
+        ? encryptId(request.reviewedByUserId)
+        : null,
       reviewedAt: request.reviewedAt,
       reviewReason: request.reviewReason,
-      createdMovieId: request.createdMovieId ? encryptId(request.createdMovieId) : null,
+      createdMovieId: request.createdMovieId
+        ? encryptId(request.createdMovieId)
+        : null,
       createdAt: request.createdAt,
       updatedAt: request.updatedAt,
     };
@@ -200,7 +245,10 @@ export class MovieRequestsService {
     return {
       ...this.mapResponse(request),
       createdMovie: request.createdMovie
-        ? { id: encryptId(request.createdMovie.id), title: request.createdMovie.title }
+        ? {
+            id: encryptId(request.createdMovie.id),
+            title: request.createdMovie.title,
+          }
         : null,
     };
   }

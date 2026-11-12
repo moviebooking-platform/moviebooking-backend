@@ -39,7 +39,10 @@ export class TheatresController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.SUPER_ADMIN)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Create theatre', description: 'Create a new theatre (Super Admin only)' })
+  @ApiOperation({
+    summary: 'Create theatre',
+    description: 'Create a new theatre (Super Admin only)',
+  })
   @ApiResponse({ status: 201, description: 'Theatre created' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
@@ -50,7 +53,11 @@ export class TheatresController {
   @Get()
   @UseGuards(OptionalJwtAuthGuard)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'List theatres', description: 'Paginated list. Unauthenticated: ACTIVE only. Super Admin: all statuses.' })
+  @ApiOperation({
+    summary: 'List theatres',
+    description:
+      'Paginated list. Unauthenticated: ACTIVE only. Super Admin: all statuses.',
+  })
   @ApiResponse({ status: 200, description: 'Theatres retrieved' })
   async findAll(
     @Query() query: ListTheatresQueryDto,
@@ -62,7 +69,10 @@ export class TheatresController {
   @Get(':id')
   @UseGuards(OptionalJwtAuthGuard)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Get theatre detail', description: 'Theatre details with screen count' })
+  @ApiOperation({
+    summary: 'Get theatre detail',
+    description: 'Theatre details with screen count',
+  })
   @ApiParam({ name: 'id', type: String, description: 'Encrypted Theatre ID' })
   @ApiResponse({ status: 200, description: 'Theatre retrieved' })
   @ApiResponse({ status: 404, description: 'Theatre not found' })
@@ -77,16 +87,16 @@ export class TheatresController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.SUPER_ADMIN)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Update theatre', description: 'Partial update (Super Admin only)' })
+  @ApiOperation({
+    summary: 'Update theatre',
+    description: 'Partial update (Super Admin only)',
+  })
   @ApiParam({ name: 'id', type: String, description: 'Encrypted Theatre ID' })
   @ApiResponse({ status: 200, description: 'Theatre updated' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   @ApiResponse({ status: 404, description: 'Theatre not found' })
-  async update(
-    @DecryptId('id') id: number,
-    @Body() dto: UpdateTheatreDto,
-  ) {
+  async update(@DecryptId('id') id: number, @Body() dto: UpdateTheatreDto) {
     return this.theatresService.update(id, dto);
   }
 
@@ -94,7 +104,10 @@ export class TheatresController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(ROLES.SUPER_ADMIN)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Delete theatre', description: 'Soft-delete by setting INACTIVE (Super Admin only)' })
+  @ApiOperation({
+    summary: 'Delete theatre',
+    description: 'Soft-delete by setting INACTIVE (Super Admin only)',
+  })
   @ApiParam({ name: 'id', type: String, description: 'Encrypted Theatre ID' })
   @ApiResponse({ status: 200, description: 'Theatre deleted' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })

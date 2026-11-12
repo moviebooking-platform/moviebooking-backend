@@ -18,7 +18,11 @@ import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
-import { LoginResponseDto, RefreshResponseDto, ProfileResponseDto } from './dto/auth-response.dto';
+import {
+  LoginResponseDto,
+  RefreshResponseDto,
+  ProfileResponseDto,
+} from './dto/auth-response.dto';
 import { JwtAuthGuard, CurrentUser, ICurrentUser } from '@moviebooking/common';
 
 @ApiTags('auth')
@@ -28,8 +32,15 @@ export class AuthController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'User login', description: 'Authenticate user with email and password' })
-  @ApiResponse({ status: 200, description: 'Login successful', type: LoginResponseDto })
+  @ApiOperation({
+    summary: 'User login',
+    description: 'Authenticate user with email and password',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Login successful',
+    type: LoginResponseDto,
+  })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   async login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
@@ -37,8 +48,15 @@ export class AuthController {
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Refresh access token', description: 'Get new access token using refresh token' })
-  @ApiResponse({ status: 200, description: 'Token refreshed', type: RefreshResponseDto })
+  @ApiOperation({
+    summary: 'Refresh access token',
+    description: 'Get new access token using refresh token',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Token refreshed',
+    type: RefreshResponseDto,
+  })
   @ApiResponse({ status: 401, description: 'Invalid refresh token' })
   async refresh(@Body() refreshTokenDto: RefreshTokenDto) {
     return this.authService.refreshToken(refreshTokenDto.refreshToken);
@@ -48,7 +66,10 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'User logout', description: 'Invalidate current session' })
+  @ApiOperation({
+    summary: 'User logout',
+    description: 'Invalidate current session',
+  })
   @ApiResponse({ status: 204, description: 'Logout successful' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async logout(@CurrentUser() user: ICurrentUser) {
@@ -58,9 +79,15 @@ export class AuthController {
   @Patch('password')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Change password', description: 'Change current user password' })
+  @ApiOperation({
+    summary: 'Change password',
+    description: 'Change current user password',
+  })
   @ApiResponse({ status: 200, description: 'Password changed successfully' })
-  @ApiResponse({ status: 400, description: 'Invalid current password or validation error' })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid current password or validation error',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async changePassword(
     @CurrentUser() user: ICurrentUser,
@@ -72,8 +99,15 @@ export class AuthController {
   @Get('me')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT-auth')
-  @ApiOperation({ summary: 'Get current user profile', description: 'Get authenticated user details' })
-  @ApiResponse({ status: 200, description: 'Profile retrieved', type: ProfileResponseDto })
+  @ApiOperation({
+    summary: 'Get current user profile',
+    description: 'Get authenticated user details',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Profile retrieved',
+    type: ProfileResponseDto,
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async me(@CurrentUser() user: ICurrentUser) {
     return this.authService.getProfile(user.id);

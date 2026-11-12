@@ -1,4 +1,11 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiExcludeController } from '@nestjs/swagger';
 import { SkipTransform } from '@moviebooking/common';
 import { InternalService } from './internal.service';

@@ -1,11 +1,15 @@
 import { Controller, Get, Param, ForbiddenException } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
-import { encryptId, decryptId, isIdCipherEnabled } from '../../utils/id-cipher.util';
+import {
+  encryptId,
+  decryptId,
+  isIdCipherEnabled,
+} from '../../utils/id-cipher.util';
 
 /**
  * Development-only endpoints for testing ID encryption.
- * Protected by DevModule conditional import (non-production only)
- * an additional runtime environment: assertNonProduction Method check as defense in depth.
+ * DevModule is only imported outside production; assertNonProduction() also
+ * refuses every request when NODE_ENV is production, as a second safeguard.
  */
 @ApiTags('dev')
 @Controller('dev')
@@ -16,9 +20,9 @@ export class DevController {
     }
   }
   @Get('encrypt/:id')
-  @ApiOperation({ 
-    summary: '[DEV ONLY] Encrypt an ID', 
-    description: 'Encrypts a numeric ID to obfuscated string.' 
+  @ApiOperation({
+    summary: '[DEV ONLY] Encrypt an ID',
+    description: 'Encrypts a numeric ID to obfuscated string.',
   })
   @ApiParam({ name: 'id', type: Number, description: 'Numeric ID to encrypt' })
   @ApiResponse({ status: 200, description: 'Encrypted ID returned' })
@@ -36,11 +40,15 @@ export class DevController {
   }
 
   @Get('decrypt/:encryptedId')
-  @ApiOperation({ 
-    summary: '[DEV ONLY] Decrypt an ID', 
-    description: 'Decrypts an obfuscated string back to numeric ID.' 
+  @ApiOperation({
+    summary: '[DEV ONLY] Decrypt an ID',
+    description: 'Decrypts an obfuscated string back to numeric ID.',
   })
-  @ApiParam({ name: 'encryptedId', type: String, description: 'Encrypted ID string to decrypt' })
+  @ApiParam({
+    name: 'encryptedId',
+    type: String,
+    description: 'Encrypted ID string to decrypt',
+  })
   @ApiResponse({ status: 200, description: 'Decrypted ID returned' })
   decrypt(@Param('encryptedId') encryptedId: string) {
     this.assertNonProduction();
@@ -54,17 +62,17 @@ export class DevController {
   }
 
   @Get('status')
-  @ApiOperation({ 
-    summary: '[DEV ONLY] Check cipher status', 
-    description: 'Check if ID encryption is enabled' 
+  @ApiOperation({
+    summary: '[DEV ONLY] Check cipher status',
+    description: 'Check if ID encryption is enabled',
   })
   @ApiResponse({ status: 200, description: 'Cipher status returned' })
   status() {
     this.assertNonProduction();
     return {
       cipherEnabled: isIdCipherEnabled(),
-      message: isIdCipherEnabled() 
-        ? 'ID encryption is enabled' 
+      message: isIdCipherEnabled()
+        ? 'ID encryption is enabled'
         : 'ID encryption is disabled (ID_ENCRYPTION_KEY not set)',
     };
   }

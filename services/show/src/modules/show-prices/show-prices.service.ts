@@ -2,7 +2,12 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { Show, ShowPrice } from '../../entities';
-import { throwError, ICurrentUser, encryptId, ROLES } from '@moviebooking/common';
+import {
+  throwError,
+  ICurrentUser,
+  encryptId,
+  ROLES,
+} from '@moviebooking/common';
 import { SetPricesDto } from './dto/set-prices.dto';
 import { TheatreClient } from '../../clients/theatre.client';
 
@@ -92,13 +97,19 @@ export class ShowPricesService {
   // Private Helper Methods
 
   /** Validates that all seat types in the screen have configured prices. */
-  private async validatePricingCompleteness(screenId: number, dto: SetPricesDto): Promise<void> {
+  private async validatePricingCompleteness(
+    screenId: number,
+    dto: SetPricesDto,
+  ): Promise<void> {
     let seats;
     try {
       seats = await this.theatreClient.getScreenSeats(screenId);
     } catch (error) {
       this.logger.error(`Theatre Service unavailable: ${error.message}`);
-      throwError('SERVICE_UNAVAILABLE', 'Theatre Service is currently unavailable');
+      throwError(
+        'SERVICE_UNAVAILABLE',
+        'Theatre Service is currently unavailable',
+      );
     }
 
     if (!seats || seats.length === 0) {
@@ -125,23 +136,32 @@ export class ShowPricesService {
   }
 
   /** Verifies that the screen belongs to the theatre. */
-  private async verifyScreenOwnership(screenId: number, theatreId: number): Promise<void> {
+  private async verifyScreenOwnership(
+    screenId: number,
+    theatreId: number,
+  ): Promise<void> {
     try {
       const screen = await this.theatreClient.getScreen(screenId);
-      
+
       if (!screen) {
         throwError('NOT_FOUND', 'Screen not found');
       }
 
       if (screen.theatreId !== theatreId) {
-        throwError('FORBIDDEN', 'You can only set prices for shows in your assigned theatre');
+        throwError(
+          'FORBIDDEN',
+          'You can only set prices for shows in your assigned theatre',
+        );
       }
     } catch (error) {
       if (error.code === 'NOT_FOUND' || error.code === 'FORBIDDEN') {
         throw error;
       }
       this.logger.error(`Theatre Service unavailable: ${error.message}`);
-      throwError('SERVICE_UNAVAILABLE', 'Theatre Service is currently unavailable');
+      throwError(
+        'SERVICE_UNAVAILABLE',
+        'Theatre Service is currently unavailable',
+      );
     }
   }
 

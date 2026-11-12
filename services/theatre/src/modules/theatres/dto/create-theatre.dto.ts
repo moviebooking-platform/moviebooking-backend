@@ -14,7 +14,11 @@ export class CreateTheatreDto {
   @MaxLength(100)
   city: string;
 
-  @ApiProperty({ example: '123 Main Street, Andheri West', minLength: 5, maxLength: 255 })
+  @ApiProperty({
+    example: '123 Main Street, Andheri West',
+    minLength: 5,
+    maxLength: 255,
+  })
   @IsString()
   @MinLength(5)
   @MaxLength(255)

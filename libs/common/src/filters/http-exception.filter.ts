@@ -41,7 +41,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
         const res = exceptionResponse as Record<string, unknown>;
         code = (res.code as string) || this.getErrorCodeFromStatus(status);
 
-        // Handle ValidationPipe Exception  
+        // Handle ValidationPipe Exception
         // ValidationPipe returns { message: string[], statusCode, error }
         if (Array.isArray(res.message)) {
           message = 'Validation failed';
@@ -123,9 +123,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
    * - 547:  Foreign key constraint violation
    * - 515:  Cannot insert NULL into NOT NULL column
    */
-  private mapDatabaseError(
-    exception: Record<string, any>,
-  ): { status: number; code: string; message: string } {
+  private mapDatabaseError(exception: Record<string, any>): {
+    status: number;
+    code: string;
+    message: string;
+  } {
     const sqlErrorNumber = exception.number as number | undefined;
 
     switch (sqlErrorNumber) {

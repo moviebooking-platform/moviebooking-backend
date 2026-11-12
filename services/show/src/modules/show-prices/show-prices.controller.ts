@@ -1,11 +1,25 @@
-import { Controller, Get, Put, Param, Body, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { JwtAuthGuard, OptionalJwtAuthGuard, RolesGuard, Roles, CurrentUser, ICurrentUser, decryptId } from '@moviebooking/common';
+import { Controller, Get, Put, Body, UseGuards } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiParam,
+} from '@nestjs/swagger';
+import {
+  JwtAuthGuard,
+  OptionalJwtAuthGuard,
+  RolesGuard,
+  Roles,
+  CurrentUser,
+  ICurrentUser,
+  DecryptId,
+} from '@moviebooking/common';
 import { ShowPricesService } from './show-prices.service';
 import { SetPricesDto } from './dto/set-prices.dto';
 import { ShowOwnershipGuard } from '../shows/guards/show-ownership.guard';
 
 @ApiTags('Show Prices')
+@ApiParam({ name: 'showId', type: String, description: 'Encrypted show ID' })
 @Controller('shows/:showId/prices')
 export class ShowPricesController {
   constructor(private readonly showPricesService: ShowPricesService) {}
@@ -13,8 +27,8 @@ export class ShowPricesController {
   @Get()
   @UseGuards(OptionalJwtAuthGuard)
   @ApiOperation({ summary: 'Get pricing for a show (Guest/Admin)' })
-  async getPrices(@Param('showId') showId: string) {
-    return this.showPricesService.getPrices(decryptId(showId));
+  async getPrices(@DecryptId('showId') showId: number) {
+    return this.showPricesService.getPrices(showId);
   }
 
   @Put()
@@ -23,10 +37,10 @@ export class ShowPricesController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Set/update pricing for a show (Theatre Admin)' })
   async setPrices(
-    @Param('showId') showId: string,
+    @DecryptId('showId') showId: number,
     @Body() dto: SetPricesDto,
     @CurrentUser() user: ICurrentUser,
   ) {
-    return this.showPricesService.setPrices(decryptId(showId), dto, user);
+    return this.showPricesService.setPrices(showId, dto, user);
   }
 }

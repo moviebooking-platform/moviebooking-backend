@@ -22,7 +22,9 @@ async function bootstrap() {
   // Swagger configuration
   const config = new DocumentBuilder()
     .setTitle('Identity Service API')
-    .setDescription('Authentication and user management API for Movie Ticket Booking System')
+    .setDescription(
+      'Authentication and user management API for Movie Ticket Booking System',
+    )
     .setVersion('1.0')
     .addBearerAuth(
       {
@@ -37,7 +39,6 @@ async function bootstrap() {
     .addTag('users', 'User management endpoints')
     .addTag('roles', 'Role management endpoints')
     .build();
-
 
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document, {

@@ -50,7 +50,7 @@ async function bootstrap() {
     new TransformInterceptor(app.get(Reflector)),
   );
 
-  // Swagger documentation 
+  // Swagger documentation
   if (configService.get('NODE_ENV') !== 'production') {
     const { DocumentBuilder, SwaggerModule } = await import('@nestjs/swagger');
     const config = new DocumentBuilder()
@@ -63,7 +63,7 @@ async function bootstrap() {
     SwaggerModule.setup('api/docs', app, document);
   }
 
-  const port = configService.get<number>('PORT', 3004);
+  const port = configService.get<number>('SHOW_SERVICE_PORT', 3004);
   await app.listen(port);
   console.log(`Show Service running on port ${port}`);
 }

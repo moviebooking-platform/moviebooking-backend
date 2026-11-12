@@ -12,9 +12,10 @@ import { PaginatedResponse } from '../dto/pagination.dto';
 import { SKIP_TRANSFORM_KEY } from '../decorators/skip-transform.decorator';
 
 @Injectable()
-export class TransformInterceptor<T>
-  implements NestInterceptor<T, ApiResponse<T> | T>
-{
+export class TransformInterceptor<T> implements NestInterceptor<
+  T,
+  ApiResponse<T> | T
+> {
   constructor(private readonly reflector: Reflector) {}
 
   intercept(

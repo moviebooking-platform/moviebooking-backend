@@ -34,7 +34,10 @@ export class ServiceClientModule {
           imports: [ConfigModule],
           inject: [ConfigService],
           useFactory: (configService: ConfigService) => ({
-            baseURL: configService.get<string>(options.envKey, options.defaultUrl),
+            baseURL: configService.get<string>(
+              options.envKey,
+              options.defaultUrl,
+            ),
             timeout: options.timeout ?? 2000,
           }),
         }),

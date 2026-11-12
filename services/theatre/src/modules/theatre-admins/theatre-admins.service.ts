@@ -32,13 +32,16 @@ export class TheatreAdminsService {
 
     // Validate user has THEATRE_ADMIN role via Identity Service
     const user = await this.identityClient.getUserById(userId);
-    
+
     if (!user) {
       throwError('NOT_FOUND', 'User not found');
     }
 
     if (user.role?.code !== ROLES.THEATRE_ADMIN) {
-      throwError('BUSINESS_RULE_VIOLATION', 'User must have THEATRE_ADMIN role');
+      throwError(
+        'BUSINESS_RULE_VIOLATION',
+        'User must have THEATRE_ADMIN role',
+      );
     }
 
     // Check no existing ACTIVE assignment
@@ -47,7 +50,10 @@ export class TheatreAdminsService {
     });
 
     if (existing) {
-      throwError('DUPLICATE_RESOURCE', 'User already has an active theatre assignment');
+      throwError(
+        'DUPLICATE_RESOURCE',
+        'User already has an active theatre assignment',
+      );
     }
 
     const assignment = this.theatreAdminRepository.create({
@@ -70,12 +76,14 @@ export class TheatreAdminsService {
   async findAll(query: ListTheatreAdminsQueryDto) {
     const { page = 1, pageSize = 20 } = query;
 
-    const [assignments, total] = await this.theatreAdminRepository.findAndCount({
-      relations: ['theatre'],
-      order: { createdAt: 'DESC' },
-      skip: (page - 1) * pageSize,
-      take: pageSize,
-    });
+    const [assignments, total] = await this.theatreAdminRepository.findAndCount(
+      {
+        relations: ['theatre'],
+        order: { createdAt: 'DESC' },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+      },
+    );
 
     // Batch fetch user data from Identity Service
     const userIds = [...new Set(assignments.map((a) => a.userId))];
@@ -83,7 +91,9 @@ export class TheatreAdminsService {
     const userMap = new Map(users.map((u) => [u.id, u]));
 
     return new PaginatedResponse(
-      assignments.map((a) => this.mapResponse(a, userMap.get(a.userId) ?? null)),
+      assignments.map((a) =>
+        this.mapResponse(a, userMap.get(a.userId) ?? null),
+      ),
       total,
       page,
       pageSize,
@@ -110,7 +120,12 @@ export class TheatreAdminsService {
 
   private mapResponse(
     assignment: TheatreAdmin,
-    user?: { id: number; name: string; email: string; role: { name: string } } | null,
+    user?: {
+      id: number;
+      name: string;
+      email: string;
+      role: { name: string };
+    } | null,
   ) {
     return {
       id: encryptId(assignment.id),

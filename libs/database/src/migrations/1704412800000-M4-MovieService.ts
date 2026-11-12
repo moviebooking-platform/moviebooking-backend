@@ -31,10 +31,16 @@ export class M4MovieService1704412800000 implements MigrationInterface {
 
     await queryRunner.query(`CREATE INDEX idx_movies_status ON movies(status)`);
     await queryRunner.query(`CREATE INDEX idx_movies_title ON movies(title)`);
-    await queryRunner.query(`CREATE INDEX idx_movies_release_date ON movies(release_date)`);
-    await queryRunner.query(`CREATE INDEX idx_movies_language ON movies(language)`);
+    await queryRunner.query(
+      `CREATE INDEX idx_movies_release_date ON movies(release_date)`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX idx_movies_language ON movies(language)`,
+    );
     // Composite index for duplicate detection (title + release_date)
-    await queryRunner.query(`CREATE UNIQUE INDEX idx_movies_title_release ON movies(title, release_date) WHERE deleted_at IS NULL`);
+    await queryRunner.query(
+      `CREATE UNIQUE INDEX idx_movies_title_release ON movies(title, release_date) WHERE deleted_at IS NULL`,
+    );
 
     // Movie Images table
     await queryRunner.query(`
@@ -50,8 +56,12 @@ export class M4MovieService1704412800000 implements MigrationInterface {
       )
     `);
 
-    await queryRunner.query(`CREATE INDEX idx_movie_images_movie ON movie_images(movie_id)`);
-    await queryRunner.query(`CREATE INDEX idx_movie_images_primary ON movie_images(movie_id, is_primary)`);
+    await queryRunner.query(
+      `CREATE INDEX idx_movie_images_movie ON movie_images(movie_id)`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX idx_movie_images_primary ON movie_images(movie_id, is_primary)`,
+    );
 
     // Movie Requests table
     await queryRunner.query(`
@@ -79,9 +89,15 @@ export class M4MovieService1704412800000 implements MigrationInterface {
       )
     `);
 
-    await queryRunner.query(`CREATE INDEX idx_movie_requests_theatre ON movie_requests(theatre_id)`);
-    await queryRunner.query(`CREATE INDEX idx_movie_requests_status ON movie_requests(status)`);
-    await queryRunner.query(`CREATE INDEX idx_movie_requests_requested_by ON movie_requests(requested_by_user_id)`);
+    await queryRunner.query(
+      `CREATE INDEX idx_movie_requests_theatre ON movie_requests(theatre_id)`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX idx_movie_requests_status ON movie_requests(status)`,
+    );
+    await queryRunner.query(
+      `CREATE INDEX idx_movie_requests_requested_by ON movie_requests(requested_by_user_id)`,
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {

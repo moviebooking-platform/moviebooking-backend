@@ -8,10 +8,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
  * Configures JWT authentication strategy for protecting endpoints.
  */
 @Module({
-  imports: [
-    ConfigModule,
-    PassportModule.register({ defaultStrategy: 'jwt' }),
-  ],
+  imports: [ConfigModule, PassportModule.register({ defaultStrategy: 'jwt' })],
   providers: [JwtStrategy],
   exports: [PassportModule],
 })

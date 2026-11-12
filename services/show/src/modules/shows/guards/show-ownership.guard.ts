@@ -1,7 +1,12 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ICurrentUser, AppException, ROLES, decryptId } from '@moviebooking/common';
+import {
+  ICurrentUser,
+  AppException,
+  ROLES,
+  decryptId,
+} from '@moviebooking/common';
 import { Show } from '../../../entities';
 import { TheatreClient } from '../../../clients/theatre.client';
 
@@ -19,7 +24,10 @@ export class ShowOwnershipGuard implements CanActivate {
     const user: ICurrentUser = request.user;
 
     // Super Admin and Staff have full access
-    if (user.role?.code === ROLES.SUPER_ADMIN || user.role?.code === ROLES.STAFF) {
+    if (
+      user.role?.code === ROLES.SUPER_ADMIN ||
+      user.role?.code === ROLES.STAFF
+    ) {
       return true;
     }
 
@@ -31,7 +39,10 @@ export class ShowOwnershipGuard implements CanActivate {
 
       // For POST /shows, check screenId from body
       if (request.method === 'POST' && request.body?.screenId) {
-        const decryptedScreenId = decryptId(request.body.screenId);
+        const decryptedScreenId = this.decryptOrFail(
+          request.body.screenId,
+          'screenId',
+        );
         const screen = await this.theatreClient.getScreen(decryptedScreenId);
 
         if (!screen) {
@@ -39,7 +50,10 @@ export class ShowOwnershipGuard implements CanActivate {
         }
 
         if (screen.theatreId !== user.theatreId) {
-          throw new AppException('FORBIDDEN', 'You can only create shows for your assigned theatre');
+          throw new AppException(
+            'FORBIDDEN',
+            'You can only create shows for your assigned theatre',
+          );
         }
         return true;
       }
@@ -47,21 +61,39 @@ export class ShowOwnershipGuard implements CanActivate {
       // For PATCH/DELETE /shows/:id, check show's screen ownership
       const showId = request.params.id || request.params.showId;
       if (showId) {
-        const decryptedShowId = decryptId(showId);
-        const show = await this.showRepository.findOne({ where: { id: decryptedShowId } });
-        
+        const decryptedShowId = this.decryptOrFail(showId, 'show ID');
+        const show = await this.showRepository.findOne({
+          where: { id: decryptedShowId },
+        });
+
         if (!show) {
           throw new AppException('NOT_FOUND', 'Show not found');
         }
 
         const screen = await this.theatreClient.getScreen(show.screenId);
         if (!screen || screen.theatreId !== user.theatreId) {
-          throw new AppException('FORBIDDEN', 'You can only access shows for your assigned theatre');
+          throw new AppException(
+            'FORBIDDEN',
+            'You can only access shows for your assigned theatre',
+          );
         }
         return true;
       }
     }
 
     throw new AppException('FORBIDDEN', 'Access denied');
+  }
+
+  /**
+   * Guards run before parameter decorators, so IDs are decrypted here too. An invalid
+   * ID must stop the request: a null ID in a TypeORM `where` is ignored and would
+   * match an arbitrary row.
+   */
+  private decryptOrFail(encryptedId: unknown, label: string): number {
+    const id = typeof encryptedId === 'string' ? decryptId(encryptedId) : null;
+    if (id === null) {
+      throw new AppException('VALIDATION_ERROR', `Invalid ${label}`);
+    }
+    return id;
   }
 }

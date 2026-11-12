@@ -1,6 +1,28 @@
-import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
-import { JwtAuthGuard, OptionalJwtAuthGuard, RolesGuard, Roles, CurrentUser, ICurrentUser, decryptId } from '@moviebooking/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Body,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiParam,
+} from '@nestjs/swagger';
+import {
+  JwtAuthGuard,
+  OptionalJwtAuthGuard,
+  RolesGuard,
+  Roles,
+  CurrentUser,
+  ICurrentUser,
+  DecryptId,
+} from '@moviebooking/common';
 import { ShowsService } from './shows.service';
 import { CreateShowDto } from './dto/create-show.dto';
 import { UpdateShowDto } from './dto/update-show.dto';
@@ -15,7 +37,10 @@ export class ShowsController {
   @Get()
   @UseGuards(OptionalJwtAuthGuard)
   @ApiOperation({ summary: 'List shows with filters (Guest/Admin)' })
-  async findAll(@Query() query: ListShowsQueryDto, @CurrentUser() user?: ICurrentUser) {
+  async findAll(
+    @Query() query: ListShowsQueryDto,
+    @CurrentUser() user?: ICurrentUser,
+  ) {
     return this.showsService.findAll(query, user);
   }
 
@@ -31,8 +56,12 @@ export class ShowsController {
   @Get(':id')
   @UseGuards(OptionalJwtAuthGuard)
   @ApiOperation({ summary: 'Get show details (Guest/Admin)' })
-  async findOne(@Param('id') id: string, @CurrentUser() user?: ICurrentUser) {
-    return this.showsService.findOne(decryptId(id), user);
+  @ApiParam({ name: 'id', type: String, description: 'Encrypted show ID' })
+  async findOne(
+    @DecryptId('id') id: number,
+    @CurrentUser() user?: ICurrentUser,
+  ) {
+    return this.showsService.findOne(id, user);
   }
 
   @Patch(':id')
@@ -40,12 +69,13 @@ export class ShowsController {
   @Roles('THEATRE_ADMIN', 'SUPER_ADMIN')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update show (Theatre Admin)' })
+  @ApiParam({ name: 'id', type: String, description: 'Encrypted show ID' })
   async update(
-    @Param('id') id: string,
+    @DecryptId('id') id: number,
     @Body() dto: UpdateShowDto,
     @CurrentUser() user: ICurrentUser,
   ) {
-    return this.showsService.update(decryptId(id), dto, user);
+    return this.showsService.update(id, dto, user);
   }
 
   @Delete(':id')
@@ -53,7 +83,8 @@ export class ShowsController {
   @Roles('THEATRE_ADMIN', 'SUPER_ADMIN')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete show (Theatre Admin)' })
-  async delete(@Param('id') id: string, @CurrentUser() user: ICurrentUser) {
-    return this.showsService.delete(decryptId(id), user);
+  @ApiParam({ name: 'id', type: String, description: 'Encrypted show ID' })
+  async delete(@DecryptId('id') id: number, @CurrentUser() user: ICurrentUser) {
+    return this.showsService.delete(id, user);
   }
 }

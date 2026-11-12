@@ -29,12 +29,18 @@ export class SeatAvailabilityService {
     const prices = await this.showPriceRepository.find({ where: { showId } });
 
     if (!prices.length) {
-      throwError('BUSINESS_RULE_VIOLATION', 'Pricing not configured for this show');
+      throwError(
+        'BUSINESS_RULE_VIOLATION',
+        'Pricing not configured for this show',
+      );
     }
 
     // Build price map by seat type
     const priceMap = new Map<string, { amount: number; currency: string }>(
-      prices.map(p => [p.seatType, { amount: p.amount, currency: p.currency }]),
+      prices.map((p) => [
+        p.seatType,
+        { amount: p.amount, currency: p.currency },
+      ]),
     );
 
     // Fetch seats from Theatre Service
@@ -44,13 +50,14 @@ export class SeatAvailabilityService {
       throwError('NOT_FOUND', 'No seats found for this screen');
     }
 
-    // TODO: Fetch bookings/holds from Booking Service (M6)
+    // TODO: this endpoint ignores bookings and holds; the Booking Service owns
+    // real availability (GET /api/shows/:showId/seats/availability on port 3005)
     // For now, all seats are AVAILABLE
     const soldSeatIds = new Set<number>();
     const heldSeatIds = new Set<number>();
 
     // Build seat availability response
-    const seatData = seats.map(seat => {
+    const seatData = seats.map((seat) => {
       let status = 'AVAILABLE';
       if (soldSeatIds.has(seat.id)) status = 'SOLD';
       else if (heldSeatIds.has(seat.id)) status = 'HELD';
@@ -72,9 +79,9 @@ export class SeatAvailabilityService {
     // Build summary
     const summary = {
       total: seatData.length,
-      available: seatData.filter(s => s.status === 'AVAILABLE').length,
-      held: seatData.filter(s => s.status === 'HELD').length,
-      sold: seatData.filter(s => s.status === 'SOLD').length,
+      available: seatData.filter((s) => s.status === 'AVAILABLE').length,
+      held: seatData.filter((s) => s.status === 'HELD').length,
+      sold: seatData.filter((s) => s.status === 'SOLD').length,
     };
 
     return {
